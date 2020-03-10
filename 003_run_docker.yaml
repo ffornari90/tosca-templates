@@ -1,0 +1,76 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - indigo_custom_types: https://paas.cloud.infn.it/public/tosca/custom_types.yaml
+
+description: Run a docker container
+
+metadata:
+  display_name: Run docker
+  icon: https://paas.cloud.infn.it/public/images/docker.png
+  allowed_groups: "developers,orchestrator-admin"
+
+topology_template:
+
+  inputs:
+
+    num_cpus:
+      type: integer
+      default: 2
+
+    mem_size:
+      type: string
+      default: "1 GB"
+
+    docker_image:
+      type: string
+      default: "ubuntu"
+
+    docker_tag:
+      type: string 
+      default: "latest"
+
+    docker_options:
+      type: string
+      default: ""
+
+    docker_command:
+      type: string
+      default: "printenv"
+
+  node_templates:
+
+    simple_node:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        endpoint:
+          properties:
+            network_name: PUBLIC
+        scalable:
+          properties:
+            count: 1
+        host:
+          properties:
+            num_cpus: { get_input: num_cpus }
+            mem_size: { get_input: mem_size }
+        os:
+          properties:
+            distribution: ubuntu
+            version: 16.04
+            type: linux
+ 
+    simple_docker:
+      type: tosca.nodes.indigo.dockerRun
+      properties:
+        docker_image: { get_input: docker_image }
+        docker_tag: { get_input: docker_tag }
+        docker_options: { get_input: docker_options }
+        docker_command: { get_input: docker_command }
+      requirements:
+        - host: simple_node 
+ 
+  outputs:
+    node_ip:
+      value: { get_attribute: [ simple_node, public_address, 0 ] }
+    node_creds:
+      value: { get_attribute: [ simple_node, endpoint, credential, 0 ] }

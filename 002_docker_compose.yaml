@@ -1,0 +1,80 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - indigo_custom_types: https://paas.cloud.infn.it/public/tosca/custom_types.yaml
+
+description: >
+  Run a docker compose file fetched from the specified URL
+
+metadata:
+  display_name: Docker-compose
+  icon: https://paas.cloud.infn.it/public/images/docker-compose.png
+  allowed_groups: "beta-testers,developers,orchestrator-admin"
+
+topology_template:
+
+  inputs:
+    num_cpus:
+      type: integer
+      description: Number of virtual cpus for the VM
+      default: 2
+    mem_size:
+      type: scalar-unit.size
+      description: Amount of memory for the VM
+      default: 4 GB
+
+    project_name:
+      type: string
+      default: myprj
+      description: Name of the project. This name will be used to create a folder under /opt to store the docker compose file
+
+    service_port:
+      type: integer
+      default: 8000
+      description: Port to open to access the service
+
+    docker_compose_file_url:
+      type: string
+      default: "https://paas.cloud.infn.it/public/tosca/docker-test.yml"
+      description: URL of the docker compose file to deploy
+
+
+  node_templates:
+
+    docker_compose_service:
+      type: tosca.nodes.indigo.DockerCompose
+      properties:
+        project_name:  { get_input: project_name }
+        docker_compose_file_url: { get_input: docker_compose_file_url }
+      requirements:
+        - host: server
+
+    server:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        endpoint:
+          properties:
+            network_name: PUBLIC
+            ports:
+              http:
+                protocol: tcp
+                source: { get_input: service_port }
+        host:
+          properties:
+            num_cpus: { get_input: num_cpus }
+            mem_size: { get_input: mem_size }
+        os:
+          properties:
+            distribution: ubuntu
+            type: linux
+            version: 16.04
+
+  outputs:
+    label:
+      value: "Node with docker-compose"
+    service_endpoint:
+      value: { concat: [ 'http://', get_attribute: [ server, public_address, 0 ], ':', get_input: service_port ] }
+    node_ip:
+      value: { get_attribute: [ server, public_address, 0 ] }
+    node_creds:
+      value: { get_attribute: [ server, endpoint, credential, 0 ] }

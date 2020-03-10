@@ -1,0 +1,77 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - indigo_custom_types: https://paas.cloud.infn.it/public/tosca/custom_types.yaml
+
+description: >
+  Run an instance of Tensorflow with GPU
+
+metadata:
+  display_name: TensorFlow with Jupyter
+  icon: https://paas.cloud.infn.it/public/images/tensorflow.png
+  tag: GPU
+  allowed_groups: "beta-testers,developers,orchestrator-admin"
+
+topology_template:
+
+  inputs:
+
+    cpus:
+      type: float
+      description: Amount of CPUs for this service
+      required: yes
+      default: 1.0
+    
+    mem:
+      type: scalar-unit.size
+      description: Amount of Memory for this service
+      required: yes 
+      default: 1 GB
+
+    gpus:
+      type: integer
+      description: Amount of GPUs for this service
+      required: yes
+      default: 1
+      constraints:
+      - valid_values: [ 1, 2 ]
+
+    jupyter_password:
+      type: string
+      description: Set password for Jupyter
+      required: yes
+  
+  node_templates:
+
+    tensorflow:
+      type: tosca.nodes.indigo.Container.Application.Docker.Marathon
+      properties:
+        environment_variables: 
+          TOKEN: { get_input: jupyter_password }
+        uris: []
+        command: "bash -c 'source /etc/bash.bashrc && jupyter notebook --notebook-dir=/tf --ip 0.0.0.0 --port $PORT0 --no-browser --allow-root --NotebookApp.token=$TOKEN'" 
+      artifacts:
+        image:
+          file: tensorflow/tensorflow:2.0.0-gpu-jupyter
+          type: tosca.artifacts.Deployment.Image.Container.Docker
+      requirements:
+        - host: docker_runtime
+
+    docker_runtime:
+      type: tosca.nodes.indigo.Container.Runtime.Docker
+      capabilities:
+        host:
+          properties:
+            num_cpus: { get_input: cpus}
+            mem_size: { get_input: mem}
+            num_gpus: { get_input: gpus}
+            publish_ports:
+               - protocol: tcp
+                 source: 8888
+            volumes: [ { concat: [ 'tensorflow:', '/tf/notebooks' , ':rw:dvdi:rexray'] } ]
+
+  outputs:
+    label:
+      value: "TensorFlow with gpu(s)"
+    endpoint: 
+      value:  { concat: [ "http://", { get_attribute : [ tensorflow, load_balancer_ips, 0 ] }, ':', { get_attribute : [ docker_runtime, host, publish_ports, 0, target ] } ] }
