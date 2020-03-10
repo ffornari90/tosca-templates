@@ -49,7 +49,7 @@ topology_template:
         repos:
         - { name: dodas, url: "https://dodas-ts.github.io/helm_charts" }
         externalIp: { get_attribute: [ k8s_master_server , public_address, 0 ]  }
-        values_file: "externalIp:\n  enabled: false\nmaster:\n  image: ttedesch/spark-py\n  imageTag: base_k8s_2.4.4_client_4.4.2\n  jupyter:\n    image: ttedesch/pyspark-notebook\n    tag: customized_3.6\n"
+        values_file: "externalIp:\n  enabled: false\nmaster:\n  image: dodasts/spark-k8s-py\n  imageTag: v2.0.0-rc1\n  jupyter:\n    image: dodasts/pyspark-notebook\n    tag: v2.0.0-rc1\n"
         kubeconfig_path: /etc/kubernetes/admin.conf
         labels: []
       requirements:
