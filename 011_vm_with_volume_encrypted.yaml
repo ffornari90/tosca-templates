@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://paas.cloud.infn.it/public/tosca/custom_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
 
 description: >
   Launch a virtual compute node with block device attached and encrypted and get
