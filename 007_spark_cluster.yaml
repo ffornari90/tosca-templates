@@ -51,7 +51,6 @@ topology_template:
         externalIp: { get_attribute: [ k8s_master_server , public_address, 0 ]  }
         values_file: "externalIp:\n  enabled: false\nmaster:\n  image: dodasts/spark-k8s-py\n  imageTag: v2.0.0-rc1\n  jupyter:\n    image: dodasts/pyspark-notebook\n    tag: v2.0.0-rc1\n"
         kubeconfig_path: /etc/kubernetes/admin.conf
-        labels: []
       requirements:
         - host: k8s_master_server
         - dependency: k8s_master
