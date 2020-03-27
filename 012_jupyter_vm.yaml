@@ -93,3 +93,7 @@ topology_template:
       value: Jupyter
     jupyter_endpoint:
       value: { concat: [ 'http://', get_attribute: [ vm_server, public_address, 0 ], ':8888' ]  }
+    node_ip:
+      value: { get_attribute: [ vm_server, public_address, 0 ] }
+    node_creds:
+      value: { get_attribute: [ vm_server, endpoint, credential, 0 ] }
