@@ -88,6 +88,6 @@ topology_template:
 
   outputs:
     label:
-      value: Spark
-    k8s_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30443' ] 
+      value: Jupyter
+    jupyter_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ], ':8888' ]  }
