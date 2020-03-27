@@ -31,7 +31,7 @@ topology_template:
       description: "Choose the  s3 mount mode: s3-goofys (suggested) or s3-contents"
       required: yes
       constraints:
-        - valid_values: [ "s3-goofys", "s3-contents" ]
+        - valid_values: [ "s3-goofys", "s3-contents", "local" ]
     s3_access_id:
       type: string
       description: "S3 access user id [str]"
@@ -92,4 +92,4 @@ topology_template:
     label:
       value: Jupyter
     jupyter_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ], ':8888' ]  }
+      value: { concat: [ 'http://', get_attribute: [ vm_server, public_address, 0 ], ':8888' ]  }
