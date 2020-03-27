@@ -16,15 +16,15 @@ topology_template:
 
     num_cpus:
       type: integer
+      description: "Number of VM vCPUs [int]"
       default: 4
     mem_size:
       type: string
+      description: "VM memory size [str]"
       default: "8 GB"
-    server_image:
-      type: string
-
     jupyter_token:
       type: string
+      description: "Token for Jupyter login [str]"
       default: "testme"
     persistence:
       type: string
@@ -32,19 +32,19 @@ topology_template:
       default: "CHANGEME"
     s3_access_id:
       type: string
+      description: "S3 access user id [str]"
       default: "CHANGEME"
     s3_access_key:
       type: string
+      description: "S3 access key [str]"
       default: "CHANGEME"
     s3_bucket:
       type: string
       default: "CHANGEME"
     s3_endpoint:
       type: string
+      description: "S3 endpoint [str]"
       default: "http://CHANGEME:9000"
-    s3_mount_prefix:
-      type: string
-      default: ""
 
   node_templates:
 
@@ -59,7 +59,7 @@ topology_template:
         s3_access_key: { get_input: s3_access_key }
         s3_bucket: { get_input: s3_bucket }
         s3_endpoint: { get_input: s3_endpoint }
-        s3_mount_prefix:  { get_input: s3_mount_prefix }
+        s3_mount_prefix: "" 
       requirements:
         - host: vm_server
 
