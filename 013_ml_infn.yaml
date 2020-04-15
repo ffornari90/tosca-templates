@@ -64,7 +64,7 @@ topology_template:
           - name: numpy
           - name: torch
           - name: uproot 
-        - name: jupyter
+          - name: jupyter
       requirements:
         - host: ml_server
 
