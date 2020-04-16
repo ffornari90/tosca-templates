@@ -25,7 +25,7 @@ topology_template:
     jupyter_token:
       type: string
       description: "Token for Jupyter login [str]"
-      default: "testme"
+      default: ""
       
   node_templates:
 
@@ -57,14 +57,14 @@ topology_template:
       type: tosca.nodes.DODAS.pip_manager
       properties:
         packages: 
-          - name: keras 
-          - name: tensorflow 
-          - name: matplotlib 
-          - name: scikit-learn
-          - name: numpy
-          - name: torch
-          - name: uproot 
-        - name: jupyter
+          - keras
+          - tensorflow
+          - matplotlib 
+          - scikit-learn
+          - numpy
+          - torch
+          - uproot
+          - jupyter
       requirements:
         - host: ml_server
 
