@@ -25,8 +25,7 @@ topology_template:
     jupyter_token:
       type: string
       description: "Token for Jupyter login [str]"
-      default: ""
-      
+
   node_templates:
 
     ml_infn_basic:
