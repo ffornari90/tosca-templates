@@ -23,6 +23,7 @@ topology_template:
       description: "VM Memory size [str]"
       default: "4 GB"
     jupyter_token:
+      required: yes
       type: string
       description: "Token for Jupyter login [str]"
       
