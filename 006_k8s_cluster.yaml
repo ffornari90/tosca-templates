@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
 
-description: Deploy a Kubernetes cluster
+description: Deploy a Kubernetes 1.16.4 cluster
 
 metadata:
   display_name: Kubernetes cluster
@@ -15,30 +15,39 @@ topology_template:
   inputs:
 
     admin_token:
+      description: token for accessing k8s dashboard
       type: string
       required: yes
 
     number_of_masters:
+      description: number of VMs for K8s master
       type: integer
-      default: 1
+      required: yes
+      constraints:
+        - valid_values: [ 1 ]
 
     num_cpus_master: 
+      description: number of CPU for K8s master VM
       type: integer
       default: 4
 
     mem_size_master:
+      description: memory size for K8s master VM
       type: string
       default: "8 GB"
 
-    number_of_slaves:
+    number_of_nodes:
+      description: number of K8s node VMs
       type: integer
       default: 1 
 
-    num_cpus_slave: 
+    num_cpus_node:
+      description: number of CPUs for K8s node VM
       type: integer
       default: 4
 
-    mem_size_slave:
+    mem_size_node:
+      description: memory size for K8s node VM
       type: string
       default: "8 GB"
 
@@ -49,20 +58,15 @@ topology_template:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
       properties:
         admin_token: { get_input: admin_token }
-        # kube_version: 1.14.0
-        # kube_front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] } 
       requirements:
         - host: k8s_master_server
 
-    k8s_slave:
+    k8s_node:
       type: tosca.nodes.DODAS.WorkerNode.Kubernetes 
       properties:
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
-        #front_end_ip: { get_attribute: [ k8s_master_server, public_address, 0 ] }
-        #kube_version: 1.14.0
-        #nfs_master_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
-        - host: k8s_slave_server
+        - host: k8s_node_server
 
     k8s_master_server:
       type: tosca.nodes.indigo.Compute
@@ -89,7 +93,7 @@ topology_template:
             version: 16.04
             #image: "ost://keystone.cloud.infn.it/9e6c6447-e51b-4c49-a136-df3473b8090e"
 
-    k8s_slave_server:
+    k8s_node_server:
       type: tosca.nodes.indigo.Compute
       capabilities:
         endpoint:
@@ -99,12 +103,12 @@ topology_template:
             #network_name: PUBLIC 
         scalable:
           properties:
-            count: { get_input: number_of_slaves }
+            count: { get_input: number_of_nodes }
         host:
           properties:
             #instance_type:  m1.large
-            num_cpus: { get_input: num_cpus_slave }
-            mem_size: { get_input: mem_size_slave } 
+            num_cpus: { get_input: num_cpus_node }
+            mem_size: { get_input: mem_size_node } 
         os:
           properties:
             #image: "ost://openstack.fisica.unipg.it/1c334195-3203-43cb-b13f-d3159304a6d6"

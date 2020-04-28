@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
 
-description: Run Jupyter on a single VM enabling Notebooks persistence in Amazon S3
+description: Run Jupyter on a single VM enabling Notebooks persistence
 
 metadata:
   display_name: Jupyter with persistence for Notebooks
@@ -28,7 +28,7 @@ topology_template:
       required: yes
     persistence:
       type: string
-      description: "Choose the  s3 mount mode: s3-goofys (suggested) or s3-contents"
+      description: "Choose the s3 mount mode: s3-contents (suggested)"
       required: yes
       constraints:
         - valid_values: [ "s3-contents", "s3-goofys", "local" ]
