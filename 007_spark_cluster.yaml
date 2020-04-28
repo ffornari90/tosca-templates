@@ -19,6 +19,11 @@ topology_template:
       type: string
       required: yes
 
+    jupyter_token:
+      description: token for accessing jupyter notebook
+      type: string
+      required: yes
+
     number_of_masters:
       description: number of VMs for K8s master
       type: integer
@@ -62,8 +67,18 @@ topology_template:
         repos:
         - { name: dodas, url: "https://dodas-ts.github.io/helm_charts" }
         externalIp: { get_attribute: [ k8s_master_server , public_address, 0 ]  }
-        values_file: "externalIp:\n  enabled: false\nmaster:\n  image: dodasts/spark-k8s-py\n  imageTag: v2.0.0-rc1\n  jupyter:\n    image: dodasts/pyspark-notebook\n    tag: v2.0.0-rc1\n"
-        kubeconfig_path: /etc/kubernetes/admin.conf
+        jupyter_token: { get_input: jupyter_token }
+        values_file: |
+          externalIp:
+            enabled: false
+          master:
+            image: dodasts/spark-k8s-py
+            imageTag: v2.0.0-rc1
+            jupyter:
+              image: dodasts/pyspark-notebook
+              token: {{ jupyter_token }}
+              tag: v2.0.0-rc1
+          kubeconfig_path: /etc/kubernetes/admin.conf
       requirements:
         - host: k8s_master_server
         - dependency: k8s_master
