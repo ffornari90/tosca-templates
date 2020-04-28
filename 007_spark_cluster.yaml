@@ -154,6 +154,10 @@ topology_template:
       value: Spark
     k8s_endpoint:
       value: { concat: [ 'https://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30443' ] }
+    jupyter_endpoint:
+      value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30888' ] }
+    sparkui_endpoint:
+      value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30808' ] }
     k8s_master_ip:
       value: { get_attribute: [ k8s_master_server, public_address, 0 ] }
     k8s_master_node_creds:
