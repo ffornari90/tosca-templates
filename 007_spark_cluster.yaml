@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
 
-description: Deploy a complete Spark 2.4.4+Jupyter computing cluster
+description: Deploy a complete Spark 2.4.5+JupyterLab computing cluster
 
 metadata:
   display_name: Spark + Jupyter cluster
@@ -72,12 +72,12 @@ topology_template:
           externalIp:
             enabled: false
           master:
-            image: dodasts/spark-k8s-py
-            imageTag: v2.0.0-rc1
+            image: dodasts/spark
+            imageTag: v2.4.5
             jupyter:
               image: dodasts/pyspark-notebook
               token: {{ jupyter_token }}
-              tag: v2.0.0-rc1
+              tag: v2.4.5
           kubeconfig_path: /etc/kubernetes/admin.conf
       requirements:
         - host: k8s_master_server
@@ -154,8 +154,8 @@ topology_template:
       value: Spark
     k8s_endpoint:
       value: { concat: [ 'https://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30443' ] }
-    jupyter_endpoint:
-      value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30888' ] }
+    jupyterlab_endpoint:
+      value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30888/lab' ] }
     sparkui_endpoint:
       value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30808' ] }
     k8s_master_ip:
