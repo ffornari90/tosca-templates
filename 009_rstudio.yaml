@@ -29,7 +29,7 @@ topology_template:
   
     rstudio_password:
       type: string
-      description: Password for rstudio user
+      description: Password for user with username rstudio
       required: yes
 
   node_templates:
@@ -60,7 +60,7 @@ topology_template:
             volumes: [ { concat: [ 'marathon:', '/home/rstudio' , ':rw:dvdi:rexray'] } ]
 
   outputs:
-    label:
-      value: "RStudio"
+    username: 
+      value: "rstudio"
     endpoint: 
       value:  { concat: [ "http://", { get_attribute : [ marathon, load_balancer_ips, 0 ] }, ':', { get_attribute : [ docker_runtime, host, publish_ports, 0, target ] } ] }
