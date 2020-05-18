@@ -4,7 +4,7 @@ imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
 
 description: >
-  Deploy a virtual machine pre-configured with the Elasticsearch search and analytics engine and with Kibana for simpe visualization of data with charts and graphs in Elasticsearch
+  Deploy a virtual machine pre-configured with the Elasticsearch search and analytics engine and with Kibana for simple visualization of data with charts and graphs in Elasticsearch
 
 metadata:
   display_name: Elasticsearch and Kibana
