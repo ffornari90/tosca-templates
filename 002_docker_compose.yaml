@@ -28,14 +28,18 @@ topology_template:
       default: myprj
       description: Name of the project. This name will be used to create a folder under /opt to store the docker compose file
 
-    service_port:
-      type: integer
-      default: 8000
-      description: Port to open to access the service
+    service_ports:
+      type: map
+      required: false
+      constraints:
+        - min_length: 0
+      entry_schema:
+        type: tosca.datatypes.network.PortSpec
+      description: Ports to open to access the service(s)
 
     docker_compose_file_url:
       type: string
-      default: "https://paas.cloud.infn.it/public/tosca/docker-test.yml"
+      default: "https://paas.cloud.infn.it/public/tosca/docker-demo.yml"
       description: URL of the docker compose file to deploy
 
 
@@ -55,10 +59,7 @@ topology_template:
         endpoint:
           properties:
             network_name: PUBLIC
-            ports:
-              http:
-                protocol: tcp
-                source: { get_input: service_port }
+            ports: { get_input: service_ports }
         host:
           properties:
             num_cpus: { get_input: num_cpus }
@@ -70,10 +71,10 @@ topology_template:
             version: 16.04
 
   outputs:
-    label:
-      value: "Node with docker-compose"
-    service_endpoint:
-      value: { concat: [ 'http://', get_attribute: [ server, public_address, 0 ], ':', get_input: service_port ] }
+#    label:
+#      value: "Node with docker-compose"
+#    ports:
+#      value: { get_attribute: [ server, ports, 0 ] }
     node_ip:
       value: { get_attribute: [ server, public_address, 0 ] }
     node_creds:
