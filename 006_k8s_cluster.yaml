@@ -132,6 +132,6 @@ topology_template:
     k8s_master_node_creds:
       value: { get_attribute: [ k8s_master_server, endpoint, credential, 0 ] }
     k8s_wn_ip:
-      value: { get_attribute: [ k8s_slave_server, private_address, 0 ] }
+      value: { get_attribute: [ k8s_node_server, private_address, 0 ] }
     k8s_wn_node_creds:
-      value: { get_attribute: [ k8s_slave_server, endpoint, credential, 0 ] }
+      value: { get_attribute: [ k8s_node_server, endpoint, credential, 0 ] }
