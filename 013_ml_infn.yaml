@@ -17,7 +17,7 @@ topology_template:
     num_cpus:
       type: integer
       description: "Number of VM vCPUs [int]"
-      default: 2
+      default: 4
     mem_size:
       type: string
       description: "VM Memory size [str]"
@@ -57,14 +57,14 @@ topology_template:
       type: tosca.nodes.DODAS.pip_manager
       properties:
         packages: 
-          - keras
-          - tensorflow
-          - matplotlib 
-          - scikit-learn
-          - numpy
-          - torch
-          - uproot
-          - jupyter
+          - name: keras
+          - name: tensorflow
+          - name: matplotlib 
+          - name: scikit-learn
+          - name: numpy
+          - name: torch
+          - name: uproot
+          - name: jupyter
       requirements:
         - host: ml_server
 
