@@ -30,9 +30,9 @@ topology_template:
       type: string 
       default: "latest"
 
-    docker_options:
+    docker_ports:
       type: string
-      default: ""
+      default: "80"
 
     docker_command:
       type: string
@@ -64,7 +64,7 @@ topology_template:
       properties:
         docker_image: { get_input: docker_image }
         docker_tag: { get_input: docker_tag }
-        docker_options: { get_input: docker_options }
+        docker_ports: { get_input: docker_ports }
         docker_command: { get_input: docker_command }
       requirements:
         - host: simple_node 
