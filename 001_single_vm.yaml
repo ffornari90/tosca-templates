@@ -27,7 +27,7 @@ topology_template:
     os_distribution:
       type: string
       default: ubuntu
-      description: Operating System distro - valid values ubuntu, centos
+      description: Operating System distro
       constraints:
          - valid_values: [ "ubuntu", "centos" ]
 
@@ -38,6 +38,15 @@ topology_template:
       constraints:
          - valid_values: [ 16.04, 18.04, 7 ]
 
+    service_ports:
+      type: map
+      required: false
+      constraints:
+        - min_length: 0
+      entry_schema:
+        type: tosca.datatypes.network.PortSpec
+      description: Ports to open on the host
+
 
   node_templates:
 
@@ -47,6 +56,7 @@ topology_template:
         endpoint:
           properties:
             network_name: PUBLIC
+            ports: { get_input: service_ports }
         scalable:
           properties:
             count: 1
@@ -62,8 +72,6 @@ topology_template:
             version: { get_input: os_version }
 
   outputs:
-    label:
-      value: "Single VM"
     node_ip:
       value: { get_attribute: [ simple_node, public_address, 0 ] }
     node_creds:
