@@ -93,7 +93,7 @@ topology_template:
     root_cern_install:
       type: tosca.nodes.DODAS.root_cern
       properties:
-        centos_url: https://cernbox.cern.ch/remote.php/webdav/root_v6.20.04.Linux-centos7-x86_64-gcc4.8.tar.gz?x-access-token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50X2lkIjoic3BpZ2EiLCJncm91cHMiOltdLCJkaXNwbGF5X25hbWUiOiJEYW5pZWxlIFNwaWdhIChzcGlnYSkifQ.Id_4goGf9qJh0HPDZMgd4kn5ZgobeqAPv-Yuh79_vj8
+        centos_url: https://swift.cloud.infn.it:8080/v1/AUTH_1b37ad64d6d14c0d8df4c461877f0ef9/packages/root_v6.20.04.Linux-centos7-x86_64-gcc4.8.tar.gz
       requirements:
         - host: cygno_server
 
