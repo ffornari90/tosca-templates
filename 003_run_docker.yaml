@@ -21,10 +21,14 @@ topology_template:
     mem_size:
       type: string
       default: "1 GB"
+      
+    docker_appname:
+      type: string
+      default: "nginx"
 
     docker_image:
       type: string
-      default: "ubuntu"
+      default: "nginx"
 
     docker_tag:
       type: string 
@@ -36,7 +40,7 @@ topology_template:
 
     docker_command:
       type: string
-      default: "printenv"
+      default: ""
 
     service_ports:
       type: integer
@@ -80,6 +84,7 @@ topology_template:
     simple_docker:
       type: tosca.nodes.indigo.dockerRun
       properties:
+        docker_appname: { get_input: docker_appname }
         docker_image: { get_input: docker_image }
         docker_tag: { get_input: docker_tag }
         docker_ports: { get_input: docker_ports }
