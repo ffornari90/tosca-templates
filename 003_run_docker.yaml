@@ -46,6 +46,7 @@ topology_template:
         endpoint:
           properties:
             network_name: PUBLIC
+            ports: { get_input: docker_ports }
         scalable:
           properties:
             count: 1
