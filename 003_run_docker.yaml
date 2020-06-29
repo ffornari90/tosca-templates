@@ -51,7 +51,6 @@ topology_template:
 #        type: tosca.datatypes.network.PortSpec
 #      description: Ports to open on the host
 
-
   node_templates:
 
     simple_node:
