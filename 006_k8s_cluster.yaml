@@ -3,11 +3,11 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
 
-description: Deploy a single master Kubernetes 1.16.4 cluster
+description: Deploy a single master Kubernetes 1.17.0 cluster
 
 metadata:
   display_name: Kubernetes cluster
-  icon: https://paas.cloud.infn.it/public/images/kubernetes.png 
+  icon: https://paas.cloud.infn.it/public/images/kubernetes.png
   allowed_groups: "beta-testers,developers,orchestrator-admin"
 
 topology_template:
@@ -26,7 +26,7 @@ topology_template:
       constraints:
         - valid_values: [ 1 ]
 
-    num_cpus_master: 
+    num_cpus_master:
       description: number of CPU for K8s master VM
       type: integer
       default: 4
@@ -39,7 +39,7 @@ topology_template:
     number_of_nodes:
       description: number of K8s node VMs
       type: integer
-      default: 1 
+      default: 1
 
     num_cpus_node:
       description: number of CPUs for K8s node VM
@@ -53,6 +53,114 @@ topology_template:
 
   node_templates:
 
+    helm_prom:
+      type: tosca.nodes.DODAS.HelmInstall
+      properties:
+        name: "prometheus"
+        chart: "stable/prometheus"
+        helm_version: v3
+        repos: []
+        values_file: |
+          server:
+            service:
+              type: NodePort
+              nodePort: 30080
+            persistentVolume:
+              enabled: false
+          alertmanager:
+            enabled: false
+      requirements:
+        - host: k8s_master_server
+        - dependency: k8s_node
+
+    helm_kube_eagle:
+      type: tosca.nodes.DODAS.HelmInstall
+      properties:
+        name: "kube-eagle"
+        chart: "kube-eagle/kube-eagle"
+        helm_version: v3
+        repos:
+          - { name: kube-eagle, url: "https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master" }
+        # TODO: create namespace
+        #inline_options:
+        #  - "--namespace monitoring"
+      requirements:
+        - host: k8s_master_server
+        - dependency: k8s_node
+
+    # CREATE GRAFANA ADMIN PASSWORD AND SECRET
+    ## TODO: also create namespace
+    grafana_secrets:
+      type: tosca.nodes.DODAS.KubeCreate.Grafana
+      properties:
+        externalParams: [] # TO BE REMOVED IN TYPES
+        name: grafana-secrets
+        admin_pwd: { get_input: admin_token }
+        manifest_file: |
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: grafana-secrets
+          type: Opaque
+          stringData:
+            admin-user: admin
+            admin-password: {{ admin_pwd }}
+      requirements:
+        - host: k8s_master_server
+        - dependency: k8s_node
+
+    helm_grafana:
+      type: tosca.nodes.DODAS.HelmInstall.Grafana
+      properties:
+        name: "grafana"
+        chart: "stable/grafana"
+        repos: []
+        prometheus_host: { get_attribute: [ k8s_master_server , private_address, 0 ] }
+        helm_version: v3
+        values_file: |
+          admin:
+            existingSecret: grafana-secrets
+          service:
+            type: NodePort
+            nodePort: 31900
+          datasources:
+            datasources.yaml:
+              apiVersion: 1
+              datasources:
+              - name: Prometheus
+                type: prometheus
+                url: http://{{ prometheus_host }}:30080
+                access: proxy
+                isDefault: true
+          dashboards:
+            default:
+              prometheus-stats:
+                # Ref: https://grafana.com/dashboards/10000
+                gnetId: 10000
+                revision: 1
+                datasource: Prometheus
+              kube-eagle-stats:
+                # Ref: https://grafana.com/dashboards/9871
+                gnetId: 9871
+                revision: 2
+                datasource: Prometheus
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+              - name: 'default'
+                orgId: 1
+                folder: ''
+                type: file
+                disableDeletion: false
+                editable: true
+                options:
+                  path: /var/lib/grafana/dashboards
+      requirements:
+        - host: k8s_master_server
+        - dependency: grafana_secrets
+        - dependency: helm_prom
+
 
     k8s_master:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
@@ -62,7 +170,7 @@ topology_template:
         - host: k8s_master_server
 
     k8s_node:
-      type: tosca.nodes.DODAS.WorkerNode.Kubernetes 
+      type: tosca.nodes.DODAS.WorkerNode.Kubernetes
       properties:
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
@@ -79,6 +187,12 @@ topology_template:
               dashboard:
                 protocol: tcp
                 source: 30443
+              api:
+                protocol: tcp
+                source: 6443
+              grafana:
+                protocol: tcp
+                source: 31900
         scalable:
           properties:
             count: { get_input: number_of_masters }
@@ -86,7 +200,7 @@ topology_template:
           properties:
             #instance_type:  m1.medium
             num_cpus: { get_input: num_cpus_master }
-            mem_size: { get_input: mem_size_master } 
+            mem_size: { get_input: mem_size_master }
         os:
           properties:
             distribution: ubuntu
@@ -100,7 +214,7 @@ topology_template:
           properties:
             #network_name: test-net.PRIVATE
             network_name: PRIVATE
-            #network_name: PUBLIC 
+            #network_name: PUBLIC
         scalable:
           properties:
             count: { get_input: number_of_nodes }
@@ -108,7 +222,7 @@ topology_template:
           properties:
             #instance_type:  m1.large
             num_cpus: { get_input: num_cpus_node }
-            mem_size: { get_input: mem_size_node } 
+            mem_size: { get_input: mem_size_node }
         os:
           properties:
             #image: "ost://openstack.fisica.unipg.it/1c334195-3203-43cb-b13f-d3159304a6d6"
@@ -125,6 +239,8 @@ topology_template:
   outputs:
     k8s_endpoint:
       value: { concat: [ 'https://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30443' ] }
+    grafana_endpoint:
+      value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':31900' ] }
     k8s_master_ip:
       value: { get_attribute: [ k8s_master_server, public_address, 0 ] }
     k8s_master_node_creds:
