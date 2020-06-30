@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/ciangottini/tosca-types/raw/new_k8s/custom_types.yaml
 
-description: Deploy a single master Kubernetes 1.16.4 cluster
+description: Deploy a single master Kubernetes 1.17.0 cluster
 
 metadata:
   display_name: Kubernetes cluster
