@@ -110,12 +110,11 @@ topology_template:
         - dependency: k8s_node
 
     helm_grafana:
-      type: tosca.nodes.DODAS.HelmInstall.Grafana
+      type: tosca.nodes.DODAS.HelmInstall
       properties:
         name: "grafana"
         chart: "stable/grafana"
         repos: []
-        prometheus_host: { get_attribute: [ k8s_master_server , private_address, 0 ] }
         helm_version: v3
         values_file: |
           admin:
@@ -129,7 +128,7 @@ topology_template:
               datasources:
               - name: Prometheus
                 type: prometheus
-                url: http://{{ prometheus_host }}:30080
+                url: http://prometheus-server.default.svc.cluster.local
                 access: proxy
                 isDefault: true
           dashboards:
