@@ -137,7 +137,7 @@ topology_template:
               datasources:
               - name: Prometheus
                 type: prometheus
-                url: http://prometheus-server.default.svc.cluster.local
+                url: http://prometheus-server.prometheus.svc.cluster.local
                 access: proxy
                 isDefault: true
           dashboards:
