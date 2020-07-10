@@ -59,6 +59,7 @@ topology_template:
         name: "prometheus"
         chart: "stable/prometheus"
         helm_version: v3
+        inline_options: "-n prometheus --create-namespace"
         repos: []
         values_file: |
           server:
@@ -79,6 +80,7 @@ topology_template:
         name: "kube-eagle"
         chart: "kube-eagle/kube-eagle"
         helm_version: v3
+        inline_options: "-n kube-eagle --create-namespace" 
         repos:
           - { name: kube-eagle, url: "https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master" }
         # TODO: create namespace
@@ -95,8 +97,14 @@ topology_template:
       properties:
         externalParams: [] # TO BE REMOVED IN TYPES
         name: grafana-secrets
+        namespace: "grafana"
         admin_pwd: { get_input: admin_token }
         manifest_file: |
+          apiVersion: v1                                                                                                     
+          kind: Namespace                                                                                                    
+          metadata:                                                                                                          
+            name: grafana                                                                                                    
+          ---
           apiVersion: v1
           kind: Secret
           metadata:
@@ -114,6 +122,7 @@ topology_template:
       properties:
         name: "grafana"
         chart: "stable/grafana"
+        inline_options: "-n grafana --create-namespace"
         repos: []
         helm_version: v3
         values_file: |
