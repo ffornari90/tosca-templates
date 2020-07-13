@@ -28,6 +28,16 @@ topology_template:
       default: myprj
       description: Name of the project. This name will be used to create a folder under /opt to store the docker compose file
 
+    environment_variables:
+      required: no
+      default: []
+      type: list
+      entry_schema:
+        type: map
+        entry_schema:
+          type: string
+      description: Environment variables
+
     service_ports:
       type: map
       required: false
@@ -50,6 +60,7 @@ topology_template:
       properties:
         project_name:  { get_input: project_name }
         docker_compose_file_url: { get_input: docker_compose_file_url }
+        environment_variables: { get_input: environment_variables }
       requirements:
         - host: server
 
