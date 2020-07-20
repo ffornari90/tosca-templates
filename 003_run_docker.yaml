@@ -55,6 +55,16 @@ topology_template:
 #        type: tosca.datatypes.network.PortSpec
 #      description: Ports to open on the host
 
+   environment_variables:
+      required: no
+      default: []
+      type: list
+      entry_schema:
+        type: map
+        entry_schema:
+          type: string
+      description: Environment variables
+      
   node_templates:
 
     simple_node:
@@ -89,6 +99,7 @@ topology_template:
         docker_tag: { get_input: docker_tag }
         docker_ports: { get_input: docker_ports }
         docker_command: { get_input: docker_command }
+        environment_variables: { get_input: environment_variables }
       requirements:
         - host: simple_node 
  
