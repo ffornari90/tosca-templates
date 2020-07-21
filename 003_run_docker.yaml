@@ -45,15 +45,6 @@ topology_template:
     service_ports:
       type: integer
       default: "8080"
-      
-#    service_ports:
-#      type: map
-#      required: false
-#      constraints:
-#        - min_length: 0
-#      entry_schema:
-#        type: tosca.datatypes.network.PortSpec
-#      description: Ports to open on the host
 
    environment_variables:
       required: no
@@ -73,7 +64,6 @@ topology_template:
         endpoint:
           properties:
             network_name: PUBLIC
-#            ports: { get_input: service_ports }
             ports:
               user_port:
                 protocol: tcp
