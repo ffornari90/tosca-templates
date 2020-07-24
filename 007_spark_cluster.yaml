@@ -78,7 +78,7 @@ topology_template:
             enabled: false
       requirements:
         - host: k8s_master_server
-        - dependency: k8s_node
+        - dependency: k8s_slave
 
     helm_kube_eagle:
       type: tosca.nodes.DODAS.HelmInstall
@@ -94,7 +94,7 @@ topology_template:
         #  - "--namespace monitoring"
       requirements:
         - host: k8s_master_server
-        - dependency: k8s_node
+        - dependency: k8s_slave
 
     # CREATE GRAFANA ADMIN PASSWORD AND SECRET
     ## TODO: also create namespace
@@ -121,7 +121,7 @@ topology_template:
             admin-password: {{ admin_pwd }}
       requirements:
         - host: k8s_master_server
-        - dependency: k8s_node
+        - dependency: k8s_slave
 
     helm_grafana:
       type: tosca.nodes.DODAS.HelmInstall
