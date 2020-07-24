@@ -59,6 +59,122 @@ topology_template:
 
   node_templates:
 
+    helm_prom:
+      type: tosca.nodes.DODAS.HelmInstall
+      properties:
+        name: "prometheus"
+        chart: "stable/prometheus"
+        helm_version: v3
+        inline_options: "-n prometheus --create-namespace"
+        repos: []
+        values_file: |
+          server:
+            service:
+              type: NodePort
+              nodePort: 30080
+            persistentVolume:
+              enabled: false
+          alertmanager:
+            enabled: false
+      requirements:
+        - host: k8s_master_server
+        - dependency: k8s_node
+
+    helm_kube_eagle:
+      type: tosca.nodes.DODAS.HelmInstall
+      properties:
+        name: "kube-eagle"
+        chart: "kube-eagle/kube-eagle"
+        helm_version: v3
+        inline_options: "-n kube-eagle --create-namespace" 
+        repos:
+          - { name: kube-eagle, url: "https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master" }
+        # TODO: create namespace
+        #inline_options:
+        #  - "--namespace monitoring"
+      requirements:
+        - host: k8s_master_server
+        - dependency: k8s_node
+
+    # CREATE GRAFANA ADMIN PASSWORD AND SECRET
+    ## TODO: also create namespace
+    grafana_secrets:
+      type: tosca.nodes.DODAS.KubeCreate.Grafana
+      properties:
+        externalParams: [] # TO BE REMOVED IN TYPES
+        name: grafana-secrets
+        namespace: "grafana"
+        admin_pwd: { get_input: admin_token }
+        manifest_file: |
+          apiVersion: v1                                                                                                     
+          kind: Namespace                                                                                                    
+          metadata:                                                                                                          
+            name: grafana                                                                                                    
+          ---
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: grafana-secrets
+          type: Opaque
+          stringData:
+            admin-user: admin
+            admin-password: {{ admin_pwd }}
+      requirements:
+        - host: k8s_master_server
+        - dependency: k8s_node
+
+    helm_grafana:
+      type: tosca.nodes.DODAS.HelmInstall
+      properties:
+        name: "grafana"
+        chart: "stable/grafana"
+        inline_options: "-n grafana --create-namespace"
+        repos: []
+        helm_version: v3
+        values_file: |
+          admin:
+            existingSecret: grafana-secrets
+          service:
+            type: NodePort
+            nodePort: 31900
+          datasources:
+            datasources.yaml:
+              apiVersion: 1
+              datasources:
+              - name: Prometheus
+                type: prometheus
+                url: http://prometheus-server.prometheus.svc.cluster.local
+                access: proxy
+                isDefault: true
+          dashboards:
+            default:
+              prometheus-stats:
+                # Ref: https://grafana.com/dashboards/10000
+                gnetId: 10000
+                revision: 1
+                datasource: Prometheus
+              kube-eagle-stats:
+                # Ref: https://grafana.com/dashboards/9871
+                gnetId: 9871
+                revision: 2
+                datasource: Prometheus
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+              - name: 'default'
+                orgId: 1
+                folder: ''
+                type: file
+                disableDeletion: false
+                editable: true
+                options:
+                  path: /var/lib/grafana/dashboards
+      requirements:
+        - host: k8s_master_server
+        - dependency: grafana_secrets
+        - dependency: helm_prom
+
     helm_install:
       type: tosca.nodes.DODAS.HelmInstall.Spark
       properties:
@@ -68,6 +184,7 @@ topology_template:
         - { name: dodas, url: "https://dodas-ts.github.io/helm_charts" }
         externalIp: { get_attribute: [ k8s_master_server , public_address, 0 ]  }
         jupyter_token: { get_input: jupyter_token }
+        helm_version: v3
         values_file: |
           externalIp:
             enabled: false
@@ -113,6 +230,9 @@ topology_template:
               jupyter:
                 protocol: tcp
                 source: 30888
+              grafana:
+                protocol: tcp
+                source: 31900
         scalable:
           properties:
             count: { get_input: number_of_masters }
@@ -164,3 +284,5 @@ topology_template:
       value: { get_attribute: [ k8s_slave_server, private_address ] }
     k8s_wn_node_creds:
       value: { get_attribute: [ k8s_slave_server, endpoint, credential ] }
+    grafana_endpoint:
+      value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':31900' ] }
