@@ -21,23 +21,41 @@ topology_template:
     mem_size:
       type: string
       default: "1 GB"
+      
+    docker_appname:
+      type: string
+      default: "nginx"
 
     docker_image:
       type: string
-      default: "ubuntu"
+      default: "nginx"
 
     docker_tag:
       type: string 
       default: "latest"
 
-    docker_options:
+    docker_ports:
       type: string
-      default: ""
+      default: "8080:80"
 
     docker_command:
       type: string
-      default: "printenv"
+      default: ""
 
+    service_ports:
+      type: integer
+      default: "8080"
+
+   environment_variables:
+      required: no
+      default: []
+      type: list
+      entry_schema:
+        type: map
+        entry_schema:
+          type: string
+      description: Environment variables
+      
   node_templates:
 
     simple_node:
@@ -46,6 +64,10 @@ topology_template:
         endpoint:
           properties:
             network_name: PUBLIC
+            ports:
+              user_port:
+                protocol: tcp
+                source: { get_input: service_ports }
         scalable:
           properties:
             count: 1
@@ -62,10 +84,12 @@ topology_template:
     simple_docker:
       type: tosca.nodes.indigo.dockerRun
       properties:
+        docker_appname: { get_input: docker_appname }
         docker_image: { get_input: docker_image }
         docker_tag: { get_input: docker_tag }
-        docker_options: { get_input: docker_options }
+        docker_ports: { get_input: docker_ports }
         docker_command: { get_input: docker_command }
+        environment_variables: { get_input: environment_variables }
       requirements:
         - host: simple_node 
  
