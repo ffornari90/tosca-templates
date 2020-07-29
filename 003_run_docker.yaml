@@ -46,7 +46,7 @@ topology_template:
       type: integer
       default: "8080"
 
-   environment_variables:
+    environment_variables:
       required: no
       default: []
       type: list
