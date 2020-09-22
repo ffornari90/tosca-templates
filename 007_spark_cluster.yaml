@@ -20,11 +20,6 @@ topology_template:
       type: string
       required: yes
 
-    jupyter_token:
-      description: token for accessing jupyter notebook
-      type: string
-      required: yes
-
     number_of_masters:
       description: number of VMs for K8s master
       type: integer
@@ -179,24 +174,15 @@ topology_template:
     helm_install:
       type: tosca.nodes.DODAS.HelmInstall.Spark
       properties:
-        name: "spark"
-        chart: "dodas/spark"
+        name: "hub"
+        chart: "dodas/jupyterhub"
         repos:
         - { name: dodas, url: "https://dodas-ts.github.io/helm_charts" }
         externalIp: { get_attribute: [ k8s_master_server , public_address, 0 ]  }
-        jupyter_token: { get_input: jupyter_token }
         helm_version: v3
         values_file: |
-          externalIp:
-            enabled: false
-          master:
-            image: dodasts/spark-k8s-py
-            imageTag: v2.0.0-rc1
-            jupyter:
-              image: dodasts/pyspark-notebook
-              token: {{ jupyter_token }}
-              tag: v2.0.0-rc1
-          kubeconfig_path: /etc/kubernetes/admin.conf
+          hub:
+            host: {{ externalIp }}
       requirements:
         - host: k8s_master_server
         - dependency: k8s_master
@@ -222,12 +208,12 @@ topology_template:
           properties:
             network_name: PUBLIC
             ports:
+              kubeconfig:
+                protocol: tcp
+                source: 6443
               dashboard:
                 protocol: tcp
                 source: 30443
-              webui:
-                protocol: tcp
-                source: 30808
               jupyter:
                 protocol: tcp
                 source: 30888
@@ -274,9 +260,7 @@ topology_template:
     k8s_endpoint:
       value: { concat: [ 'https://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30443' ] }
     jupyter_endpoint:
-      value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30888' ] }
-    sparkui_endpoint:
-      value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30808' ] }
+      value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30888/hub' ] }
     k8s_master_ip:
       value: { get_attribute: [ k8s_master_server, public_address, 0 ] }
     k8s_master_node_creds:
