@@ -1,0 +1,176 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - indigo_custom_types: https://baltig.infn.it/antonacci/tosca-types/raw/master/custom_types.yaml
+
+description: >
+  Deploy a cloud storage service
+
+metadata:
+  display_name: Cloud Storage Service
+  icon: https://paas.cloud.infn.it/public/images/cloud_storage.jpg
+
+topology_template:
+
+  inputs:
+
+    num_cpus:
+      type: integer
+      description: Number of virtual cpus for the VM
+      default: 2
+
+    mem_size:
+      type: scalar-unit.size
+      description: Amount of memory for the VM
+      default: 4 GB
+
+    contact_email:
+      type: string
+      required: yes
+      description: Insert your Email for receiving notifications
+
+    owncloud_admin_username:
+      type: string
+      default: "admin"
+      description: Username for ownCloud admin access
+
+    owncloud_admin_password:
+      type: string
+      required: yes
+      description: Password for ownCloud admin user
+
+    mysql_root_password:
+      type: string
+      required: yes
+      description: Password for MySQL root
+
+    monitoring_admin_username:
+      type: string
+      default: "admin"
+      description: Username for the admin user of the monitoring service
+
+    monitoring_admin_password:
+      type: string
+      required: yes
+      description: Password for the admin user of the monitoring service
+
+    backup_webui_password:
+      type: string
+      required: yes
+      description: Password for backup service Web UI login
+
+
+    owncloud_bucket_name:
+      type: string
+      required: yes
+      description: Name of the bucket used by ownCloud
+
+    backup_bucket_name:
+      type: string
+      required: yes
+      description: Name of the bucket used by the monitoring system
+
+    aws_access_key:
+      type: string
+      required: yes
+      description: Access key for creating the buckets
+
+    aws_secret_key:
+      type: string
+      required: yes
+      description: Secret key for creating the buckets
+
+    smtp_username:
+      type: string
+      required: yes
+      description: username for SMTP
+
+    smtp_password:
+      type: string
+      required: yes
+      description: password for SMTP
+
+  node_templates:
+
+    s3_owncloud_bucket:
+      type: tosca.nodes.indigo.S3Bucket
+      properties:
+        bucket_name: { get_input: owncloud_bucket_name }
+        aws_access_key: { get_input: aws_access_key }
+        aws_secret_key: { get_input: aws_secret_key }
+        s3_url: 'https://swift.cloud.infn.it'
+      requirements:
+        - host: server
+
+    s3_backup_bucket:
+      type: tosca.nodes.indigo.S3Bucket
+      properties:
+        bucket_name: { get_input: backup_bucket_name }
+        aws_access_key: { get_input: aws_access_key }
+        aws_secret_key: { get_input: aws_secret_key }
+        s3_url: 'https://swift.cloud.infn.it'
+      requirements:
+        - host: server
+
+    docker_compose_service:
+      type: tosca.nodes.indigo.DockerCompose.CloudStorageService
+      properties:
+        project_name: storageservice
+        docker_compose_file_url: "https://baltig.infn.it/infn-cloud/apps/-/raw/master/cloudstorage/docker-compose.yml"
+        owncloud_hostname: { concat: [ "data.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
+        nagios_hostname: { concat: [ "status.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
+        duplicati_hostname: { concat: [ "backup.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
+        s3_bucket: { get_property: [ s3_owncloud_bucket, bucket_name ] }
+        s3_access_key: { get_property: [ s3_owncloud_bucket, aws_access_key ] }
+        s3_secret_key: { get_property: [ s3_owncloud_bucket, aws_secret_key ] }
+        s3_endpoint: { get_property: [ s3_owncloud_bucket, s3_url ] }
+        environment_variables:
+          - OWNCLOUD_ADMIN_USERNAME: { get_input: owncloud_admin_username }
+          - OWNCLOUD_ADMIN_PASSWORD: { get_input: owncloud_admin_password }
+          - MYSQL_ROOT_PASSWORD: { get_input: mysql_root_password }
+          - NAGIOS_ADMIN_USERNAME: { get_input: monitoring_admin_username  }
+          - NAGIOS_ADMIN_PASSWORD: { get_input: monitoring_admin_password }
+          - DUPLICATI_WEBUI_PASSWORD: { get_input: backup_webui_password }
+          - CONTACT_EMAIL: { get_input: contact_email }
+          - SMTP_USERNAME: { get_input: smtp_username }
+          - SMTP_PASSWORD: { get_input: smtp_password }
+      requirements:
+        - host: server
+        - dependency: s3_owncloud_bucket
+
+    server:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        endpoint:
+          properties:
+            network_name: PUBLIC
+            ports:
+              http:
+                protocol: tcp
+                source: 80
+              https:
+                protocol: tcp
+                source: 443
+        host:
+          properties:
+            num_cpus: { get_input: num_cpus }
+            mem_size: { get_input: mem_size }
+        os:
+          properties:
+            distribution: ubuntu
+            type: linux
+            version: 16.04
+
+  outputs:
+    storage_service_endpoint:
+      value: { concat: [ 'https://data.', get_attribute: [ server, public_address, 0 ], '.myip.cloud.infn.it' ] }
+    status_service_endpoint:
+      value: { concat: [ 'https://status.', get_attribute: [ server, public_address, 0 ], '.myip.cloud.infn.it' ] }
+    backup_service_endpoint:
+      value: { concat: [ 'https://backup.', get_attribute: [ server, public_address, 0 ], '.myip.cloud.infn.it' ] }
+    backup_bucket_name:
+      value: { get_property: [ s3_backup_bucket, bucket_name ] }
+    node_ip:
+      value: { get_attribute: [ server, public_address, 0 ] }
+    node_creds:
+      value: { get_attribute: [ server, endpoint, credential, 0 ] }
