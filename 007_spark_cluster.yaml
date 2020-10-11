@@ -154,6 +154,11 @@ topology_template:
                 gnetId: 9871
                 revision: 2
                 datasource: Prometheus
+              spark-stats:
+                # Ref: https://grafana.com/dashboards/7890
+                gnetId: 7890
+                revision: 4
+                datasource: Prometheus  
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
