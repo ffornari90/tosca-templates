@@ -44,6 +44,17 @@ topology_template:
       required: true
       description: Password for kibana system user
 
+    ports:
+      description:
+      type: map
+      required: false
+      default: { "kibana": { "protocol": "tcp", "source": 5601 } }
+      constraints:
+        - min_length: 0
+      entry_schema:
+        type: tosca.datatypes.network.PortSpec
+      description: Ports to open on the VM
+
   node_templates:
 
     elasticsearch:
@@ -71,10 +82,7 @@ topology_template:
         endpoint:
           properties:
             network_name: PUBLIC
-            ports:
-              kibana:
-                protocol: tcp
-                source: 5601
+            ports: { get_input: ports }
         host:
           properties:
             num_cpus: { get_input: num_cpus }
@@ -86,8 +94,6 @@ topology_template:
             version: 16.04
 
   outputs:
-    label:
-      value: "Elasticsearch and Kibana"
     kibana_endpoint:
       value: { concat: [ 'http://', get_attribute: [ kibana_es_server, public_address, 0 ], ':5601' ] }
     node_ip:
