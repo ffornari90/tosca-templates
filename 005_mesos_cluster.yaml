@@ -69,6 +69,7 @@ topology_template:
         mesos_password: { get_input: mesos_password }
         marathon_password: { get_input: marathon_password }
         chronos_password: { get_input: chronos_password }
+        enable_consul_sd: false
       requirements:
         - host: mesos_master_server
 
@@ -77,6 +78,7 @@ topology_template:
       properties:
         master_ips: { get_attribute: [ mesos_master_server, private_address ] }
         front_end_ip: { get_attribute: [ mesos_master_server, private_address, 0 ] }
+        enable_consul_sd: false
       requirements:
         - host: mesos_slave_server
       capabilities:
@@ -89,6 +91,7 @@ topology_template:
       properties:
         master_ips: { get_attribute: [ mesos_master_server, private_address ] }
         marathon_password: { get_input: marathon_password }
+        enable_consul_sd: false
       requirements:
         - host: mesos_lb_server
 
