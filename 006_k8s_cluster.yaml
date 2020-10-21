@@ -16,7 +16,7 @@ topology_template:
   inputs:
 
     admin_token:
-      description: password token for accessing k8s dashboard
+      description: password token for accessing k8s dashboard and grafana dashboard
       type: string
       required: yes
 
@@ -51,6 +51,17 @@ topology_template:
       description: memory size for K8s node VM
       type: string
       default: "8 GB"
+
+    ports:
+      description:
+      type: map
+      required: false
+      default: { "dashboard": { "protocol": "tcp", "source": 30443 }, "api": { "protocol": "tcp", "source": 6443 }, "grafana": { "protocol": "tcp", "source": 31900 }}
+      constraints:
+        - min_length: 0
+      entry_schema:
+        type: tosca.datatypes.network.PortSpec
+      description: Ports to open on the K8s master VM
 
   node_templates:
 
@@ -192,16 +203,7 @@ topology_template:
           properties:
             #network_name: infn-farm.PUBLIC
             network_name: PUBLIC
-            ports:
-              dashboard:
-                protocol: tcp
-                source: 30443
-              api:
-                protocol: tcp
-                source: 6443
-              grafana:
-                protocol: tcp
-                source: 31900
+            ports: { get_input: ports }
         scalable:
           properties:
             count: { get_input: number_of_masters }
@@ -250,6 +252,8 @@ topology_template:
       value: { concat: [ 'https://', get_attribute: [ k8s_master_server, public_address, 0 ], ':30443' ] }
     grafana_endpoint:
       value: { concat: [ 'http://', get_attribute: [ k8s_master_server, public_address, 0 ], ':31900' ] }
+    grafana_username:
+      value: admin
     k8s_master_ip:
       value: { get_attribute: [ k8s_master_server, public_address, 0 ] }
     k8s_master_node_creds:
