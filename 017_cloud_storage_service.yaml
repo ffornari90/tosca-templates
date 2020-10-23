@@ -161,6 +161,12 @@ topology_template:
             type: linux
             version: 16.04
 
+  policies:
+    - deploy_on_specific_site:
+        type: tosca.policies.indigo.SlaPlacement
+        properties:
+          sla_id: 5e1daa90d000a819fe11ca56
+
   outputs:
     storage_service_endpoint:
       value: { concat: [ 'https://data.', get_attribute: [ server, public_address, 0 ], '.myip.cloud.infn.it' ] }
