@@ -117,8 +117,8 @@ topology_template:
             count: 1
         host:
           properties:
-            num_cpus: 2
-            mem_size: 2 GB
+            num_cpus: { get_input: master_cpus }
+            mem_size: { get_input: master_mem }
         os:
           properties:
             type: linux
@@ -165,8 +165,6 @@ topology_template:
             version: 16.04
 
   outputs:
-    label:
-      value: "Mesos cluster"
     mesos_endpoint:
       value: { concat: [ 'http://', get_attribute: [ mesos_master_server, public_address, 0 ], ':5050' ] }
     marathon_endpoint:
