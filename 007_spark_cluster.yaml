@@ -59,10 +59,11 @@ topology_template:
       type: tosca.nodes.DODAS.HelmInstall
       properties:
         name: "prometheus"
-        chart: "stable/prometheus"
+        chart: "prometheus/prometheus"
         helm_version: v3
         inline_options: "-n prometheus --create-namespace"
-        repos: []
+        repos:
+          - { name: prometheus, url: "https://grafana.github.io/helm-charts" }
         values_file: |
           server:
             service:
@@ -74,7 +75,7 @@ topology_template:
             enabled: false
       requirements:
         - host: k8s_master_server
-        - dependency: k8s_slave
+        - dependency: k8s_node
 
     helm_kube_eagle:
       type: tosca.nodes.DODAS.HelmInstall
@@ -123,9 +124,10 @@ topology_template:
       type: tosca.nodes.DODAS.HelmInstall
       properties:
         name: "grafana"
-        chart: "stable/grafana"
+        chart: "grafana/grafana"
         inline_options: "-n grafana --create-namespace"
-        repos: []
+        repos:
+          - { name: grafana, url: "https://grafana.github.io/helm-charts" }
         helm_version: v3
         values_file: |
           admin:
