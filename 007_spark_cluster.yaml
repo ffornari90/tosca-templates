@@ -75,7 +75,7 @@ topology_template:
             enabled: false
       requirements:
         - host: k8s_master_server
-        - dependency: k8s_node
+        - dependency: k8s_slave
 
     helm_kube_eagle:
       type: tosca.nodes.DODAS.HelmInstall
