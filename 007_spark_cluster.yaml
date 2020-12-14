@@ -51,6 +51,16 @@ topology_template:
       description: memory size for K8s node VM
       type: string
       default: "8 GB"
+    
+    s3_bucket:
+      type: string
+      description: S3 bucket
+    
+    s3_endpoint:
+      type: string
+      description: "S3 endpoint (http://endpoint:9000)"
+      default: "https://minio.cloud.infn.it/"
+
 
 
   node_templates:
@@ -186,10 +196,15 @@ topology_template:
         repos:
         - { name: dodas, url: "https://dodas-ts.github.io/helm_charts" }
         externalIp: { get_attribute: [ k8s_master_server , public_address, 0 ]  }
+        s3_bucket: { get_input: s3_bucket }
+        s3_endpoint : { get_input: s3_endpoint }
         helm_version: v3
         values_file: |
           hub:
             host: {{ externalIp }}
+          s3:
+            bucket: {{ s3_bucket }}
+            endpoint: {{ s3_endpoint }}
       requirements:
         - host: k8s_master_server
         - dependency: k8s_master
