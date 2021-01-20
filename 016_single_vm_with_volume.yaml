@@ -62,13 +62,38 @@ topology_template:
 
   node_templates:
 
+    pub_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: public
+
+    server_pub_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 1
+      requirements:
+        - binding: server
+        - link: pub_network
+
+    priv_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: private
+
+    server_priv_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 0
+      requirements:
+        - binding: server
+        - link: priv_network
+
+
     server:
       type: tosca.nodes.indigo.Compute
       capabilities:
         endpoint:
           properties:
-            network_name: PUBLIC
-            private_ip: false
             ports: { get_input: ports }
         scalable:
           properties:
