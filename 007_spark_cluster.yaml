@@ -65,6 +65,40 @@ topology_template:
 
   node_templates:
 
+    pub_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: public
+
+    server_pub_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 1
+      requirements:
+        - binding: k8s_master_server
+        - link: pub_network
+
+    priv_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: private
+
+    server_priv_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 0
+      requirements:
+        - binding: k8s_master_server
+        - link: priv_network
+
+    slave_priv_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 0
+      requirements:
+        - binding: k8s_slave_server
+        - link: priv_network
+
     helm_prom:
       type: tosca.nodes.DODAS.HelmInstall
       properties:
@@ -228,7 +262,6 @@ topology_template:
       capabilities:
         endpoint:
           properties:
-            network_name: PUBLIC
             ports:
               kubeconfig:
                 protocol: tcp
@@ -257,9 +290,6 @@ topology_template:
     k8s_slave_server:
       type: tosca.nodes.indigo.Compute
       capabilities:
-        endpoint:
-          properties:
-            network_name: PRIVATE
         scalable:
           properties:
             count: { get_input: number_of_slaves }
@@ -276,7 +306,7 @@ topology_template:
     - deploy_on_specific_site:
         type: tosca.policies.indigo.SlaPlacement
         properties:
-          sla_id: 5e1daa90d000a819fe11ca56
+          sla_id: 7868ea9d-16d1-4aa7-81ca-613fde477a08
 
   outputs:
     k8s_dashboard:
