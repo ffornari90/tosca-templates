@@ -134,7 +134,7 @@ topology_template:
 
   outputs:
     k8s_endpoint:
-      value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, public_address, 0 ],  '.myip.cloud.infn.it ] }
+      value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, public_address, 0 ],  '.myip.cloud.infn.it' ] }
     grafana_endpoint:
       value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     grafana_username:
