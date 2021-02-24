@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
 
-description: Run a single VM with all the ML-INFN envirnoment exposing both ssh access and Jupyter
+description: Provision a single VM with all the ML-INFN envirnoment exposing both ssh access and JupyterHub and monitoring
 
 metadata:
   display_name: Working Station for Machine Learning INFN (ML_INFN)
@@ -16,68 +16,128 @@ topology_template:
 
     num_cpus:
       type: integer
-      description: "Number of VM vCPUs [int]"
-      default: 4
+      description: Number of virtual cpus for the VM
+      default: 2
+      constraints:
+      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+
+    num_gpus:
+      type: integer
+      description: Number of GPUs for the VM
+      default: 0
+      constraints:
+      - valid_values: [ 0, 1, 2]
+
     mem_size:
+      type: scalar-unit.size
+      description: Amount of memory for the VM
+      default: 4 GB
+      constraints:
+      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB ]
+
+    os_distribution:
       type: string
-      description: "VM Memory size [str]"
-      default: "4 GB"
-    jupyter_token:
-      required: yes
+      default: ubuntu
+      description: Operating System distro
+      constraints:
+         - valid_values: [ "ubuntu" ]
+
+    os_version:
+      type: version
+      default: 18.04
+      description: Operating System distribution version
+      constraints:
+         - valid_values: [ 18.04 ]
+
+    iam_url:
       type: string
-      description: "Token for Jupyter login [str]"
-      
+      default: "https://iam.cloud.infn.it"
+      description: IAM Instance for end user authentication
+
+    iam_groups:
+      type: string
+      default: "beta-tester"
+      description: IAM groups for authorization management
+
+    jupyter_repo_url:
+      type: string
+      default: "https://github.com/DODAS-TS/jupyterhub-ML_INFN.git"
+      description: Repo url for customized jupyter hub configuration 
+
+    jupyter_image:
+      type: string
+      default: "dodasts/testjupyter:v1"
+      description: Default image for jupyter server
+
+    cvmfs_repos:
+      type: string
+      default: "cms.cern.ch sft.cern.ch atlas.cern.ch"
+      description: CMFS repositories to mount  
+
+    use_gpu:
+      type: boolean
+      default: true
+      description: Enable GPU driver installation
+
+    ports:
+      description:
+      type: map
+      required: false
+      default: { "jupyter": { "protocol": "tcp", "source": 8888 }, "grafana": { "protocol": "tcp", "source": 3000 } }
+      constraints:
+        - min_length: 0
+      entry_schema:
+        type: tosca.datatypes.network.PortSpec
+      description: Ports to open on the VM
+
+
   node_templates:
 
-    ml_infn_basic:
-      type: tosca.nodes.DODAS.ml_infn
+    ml_install:
+      type: tosca.nodes.DODAS.single-node-jupyterhub
       properties:
-        ml_user: "cloudadm"
-        jupyter_port: 8888
-        jupyter_token: { get_input: jupyter_token }
-        ml_test_url: "http://cmsdoc.cern.ch/~spiga/test_InfnCloud_v0.2.tar.gz"
-        cvmfs_repositories: 
-          - cms-ib.cern.ch
-          - cms.cern.ch
-          - atlas-condb.cern.ch
-          - atlas-nightlies.cern.ch
-          - atlas-online-nightlies.cern.ch
-          - atlas.cern.ch
-          - alice.cern.ch
-          - geant4.cern.ch
-          - sft.cern.ch
-          - lhcb.cern.ch
-          #,ilc.desy.de]
+        use_gpu: { get_input: use_gpu }
+        iam_url: { get_input: iam_url }
+        iam_groups: { get_input: iam_groups }
+        jupyter_image: { get_input: jupyter_image }
+        jupyter_repo_url: { get_input: jupyter_repo_url }
+        cvmfs_repos: { get_input: cvmfs_repos }
+        server_ip: { get_attribute: [ HOST, public_address, 0 ] }
       requirements:
-        - host: ml_server
-        - dependency: pip_manager_install
+        - host: vm_server
 
-
-    pip_manager_install:
-      type: tosca.nodes.DODAS.pip_manager
+    pub_network:
+      type: tosca.nodes.network.Network
       properties:
-        packages: 
-          - name: keras
-          - name: tensorflow
-          - name: matplotlib 
-          - name: scikit-learn
-          - name: numpy
-          - name: torch
-          - name: uproot
-          - name: jupyter
-      requirements:
-        - host: ml_server
+        network_type: public
 
-    ml_server:
+    server_pub_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 1
+      requirements:
+        - binding: vm_server
+        - link: pub_network
+
+    priv_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: private
+
+    server_priv_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 0
+      requirements:
+        - binding: vm_server
+        - link: priv_network
+
+    vm_server:
       type: tosca.nodes.indigo.Compute
       capabilities:
         endpoint:
           properties:
-            network_name: PUBLIC
-            ports:
-              jupyter:
-                protocol: tcp
-                source: 8888
+            ports: { get_input: ports }
         scalable:
           properties:
             count: 1
@@ -85,17 +145,18 @@ topology_template:
           properties:
             num_cpus: { get_input: num_cpus }
             mem_size: { get_input: mem_size }
+            num_gpus: { get_input: num_gpus }
         os:
           properties:
-            distribution: centos
-            version: 7
+            distribution: { get_input: os_distribution }
+            version: { get_input: os_version }
 
   outputs:
-    label:
-      value: "ML-INFN working station"
     node_ip:
-      value: { get_attribute: [ ml_server, public_address, 0 ] }
+      value: { get_attribute: [ vm_server, public_address, 0 ] }
     node_creds:
-      value: { get_attribute: [ ml_server, endpoint, credential, 0 ] }
+      value: { get_attribute: [ vm_server, endpoint, credential, 0 ] }
     jupyter_endpoint:
-      value: { concat: [ 'http://', get_attribute: [ ml_server, public_address, 0 ],":8888" ]}
+      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":8888" ]}
+    grafana_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":3000" ]}
