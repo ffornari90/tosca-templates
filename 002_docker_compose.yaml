@@ -41,6 +41,7 @@ topology_template:
     service_ports:
       type: map
       required: false
+      default: { "ssh": { "protocol": "tcp", "source": 22 } }
       constraints:
         - min_length: 0
       entry_schema:
