@@ -56,8 +56,13 @@ topology_template:
 
     iam_groups:
       type: string
-      default: "beta-tester"
+      default: "beta-testers"
       description: IAM groups for authorization management
+
+    iam_admin_groups:
+      type: string
+      default: "beta-testers"
+      description: IAM groups for JupyterHub ADMIN authorization management
 
     jupyter_repo_url:
       type: string
@@ -66,7 +71,7 @@ topology_template:
 
     jupyter_image:
       type: string
-      default: "dodasts/testjupyter:v1"
+      default: "dodasts/mlinfn-base:v1 dodasts/mlinfn-conda-base:v1"
       description: Default image for jupyter server
 
     cvmfs_repos:
@@ -90,7 +95,6 @@ topology_template:
         type: tosca.datatypes.network.PortSpec
       description: Ports to open on the VM
 
-
   node_templates:
 
     ml_install:
@@ -99,6 +103,7 @@ topology_template:
         use_gpu: { get_input: use_gpu }
         iam_url: { get_input: iam_url }
         iam_groups: { get_input: iam_groups }
+        iam_admin_groups: { get_input: iam_admin_groups }
         jupyter_image: { get_input: jupyter_image }
         jupyter_repo_url: { get_input: jupyter_repo_url }
         cvmfs_repos: { get_input: cvmfs_repos }
