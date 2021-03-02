@@ -62,7 +62,7 @@ topology_template:
       default: "https://github.com/DODAS-TS/jupyterhub_CYGNO.git"
       description: Repo url for customized jupyter hub configuration 
 
-    jupyter_image:
+    jupyter_images:
       type: string
       default: "dodasts/cygno-base:v1"
       description: Default image 
@@ -86,7 +86,7 @@ topology_template:
         iam_url: { get_input: iam_url }
         iam_groups: { get_input: iam_groups }
         iam_admin_groups: { get_input: iam_admin_groups }
-        jupyter_image: { get_input: jupyter_image }
+        jupyter_images: { get_input: jupyter_images }
         jupyter_repo_url: { get_input: jupyter_repo_url }
         server_ip: { get_attribute: [ HOST, public_address, 0 ] }
       requirements:
