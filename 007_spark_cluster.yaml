@@ -142,9 +142,6 @@ topology_template:
         endpoint:
           properties:
             ports:
-              kubeconfig:
-                protocol: tcp
-                source: 6443
               http:
                 protocol: tcp
                 source: 80
@@ -188,7 +185,7 @@ topology_template:
     k8s_dashboard:
       value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     k8s_api:
-      value: { concat: [ 'https://', get_attribute: [ k8s_master_server, public_address, 0 ], ':6443' ] }
+      value:  { concat: [ 'https://api-kubernetes.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it/' ] }
     jupyter_endpoint:
       value: { concat: [ 'https://jhub.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it/hub' ] }
     k8s_master_ip:
