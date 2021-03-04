@@ -98,7 +98,7 @@ topology_template:
         bucket_name: { get_input: owncloud_bucket_name }
         aws_access_key: { get_input: aws_access_key }
         aws_secret_key: { get_input: aws_secret_key }
-        s3_url: 'https://swift.cloud.infn.it'
+        s3_url: 'https://s3.cloud.infn.it'
       requirements:
         - host: server
 
@@ -108,7 +108,7 @@ topology_template:
         bucket_name: { get_input: backup_bucket_name }
         aws_access_key: { get_input: aws_access_key }
         aws_secret_key: { get_input: aws_secret_key }
-        s3_url: 'https://swift.cloud.infn.it'
+        s3_url: 'https://s3.cloud.infn.it'
       requirements:
         - host: server
 
