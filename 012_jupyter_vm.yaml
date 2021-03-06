@@ -16,84 +16,127 @@ topology_template:
 
     num_cpus:
       type: integer
-      description: "Number of VM vCPUs [int]"
-      default: 4
-    mem_size:
-      type: string
-      description: "VM memory size [str]"
-      default: "8 GB"
-    jupyter_token:
-      type: string
-      description: "Token for Jupyter login [str]"
-      required: yes
-    persistence:
-      type: string
-      description: "Choose the s3 mount mode: s3-contents (suggested)"
-      required: yes
+      description: Number of virtual cpus for the VM
+      default: 2
       constraints:
-        - valid_values: [ "s3-contents", "s3-goofys", "local" ]
-    s3_access_id:
+      - valid_values: [ 2, 4, 8 ]
+
+    mem_size:
+      type: scalar-unit.size
+      description: Amount of memory for the VM
+      default: 4 GB
+      constraints:
+      - valid_values: [ 4 GB, 8 GB, 16 GB ]
+
+    os_distribution:
       type: string
-      description: "S3 access user id [str]"
-      required: yes
-    s3_access_key:
+      default: ubuntu
+      description: Operating System distro
+      constraints:
+         - valid_values: [ "ubuntu" ]
+
+    os_version:
+      type: version
+      default: 18.04
+      description: Operating System distribution version
+      constraints:
+         - valid_values: [ 18.04 ]
+
+    iam_url:
       type: string
-      description: "S3 access key [str]"
-      required: yes
-    s3_bucket:
+      default: "https://iam.cloud.infn.it"
+      description: IAM Instance for end user authentication
+
+    iam_groups:
       type: string
-      required: yes
-    s3_endpoint:
+      default: "beta-testers"
+      description: IAM groups for authorization management
+
+    iam_admin_groups:
       type: string
-      description: "S3 endpoint (http://endpoint:9000)"
-      required: yes
+      default: "beta-testers"
+      description: IAM groups for JupyterHub ADMIN authorization management
+
+    jupyter_images:
+      type: string
+      default: "dodasts/persistent-storage-base:v1"
+      description: Default image 
+
+    ports:
+      description:
+      type: map
+      required: false
+      default: { "jupyter": { "protocol": "tcp", "source": 8888 }, "grafana": { "protocol": "tcp", "source": 3000 } }
+      constraints:
+        - min_length: 0
+      entry_schema:
+        type: tosca.datatypes.network.PortSpec
+      description: Ports to open on the VM
 
   node_templates:
 
-    jupyter_install:
-      type: tosca.nodes.DODAS.JupyterVM
+    ml_install:
+      type: tosca.nodes.DODAS.single-node-jupyterhub
       properties:
-        vm_user: cloudadm 
-        jupyter_port: 8888 
-        jupyter_token: { get_input: jupyter_token }
-        persistence: { get_input: persistence }
-        s3_access_id: { get_input: s3_access_id }
-        s3_access_key: { get_input: s3_access_key }
-        s3_bucket: { get_input: s3_bucket }
-        s3_endpoint: { get_input: s3_endpoint }
-        s3_mount_prefix: "" 
+        iam_url: { get_input: iam_url }
+        iam_groups: { get_input: iam_groups }
+        iam_admin_groups: { get_input: iam_admin_groups }
+        jupyter_images: { get_input: jupyter_images }
+        server_ip: { get_attribute: [ HOST, public_address, 0 ] }
       requirements:
         - host: vm_server
+
+    pub_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: public
+
+    server_pub_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 1
+      requirements:
+        - binding: vm_server
+        - link: pub_network
+
+    priv_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: private
+
+    server_priv_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 0
+      requirements:
+        - binding: vm_server
+        - link: priv_network
 
     vm_server:
       type: tosca.nodes.indigo.Compute
       capabilities:
         endpoint:
           properties:
-            network_name: PUBLIC
-            ports:
-              jupyter:
-                protocol: tcp
-                source: 8888
+            ports: { get_input: ports }
         scalable:
           properties:
             count: 1
         host:
           properties:
-            #instance_type:  m1.medium
             num_cpus: { get_input: num_cpus }
             mem_size: { get_input: mem_size }
         os:
           properties:
-            distribution: ubuntu
-            version: 18.04
+            distribution: { get_input: os_distribution }
+            version: { get_input: os_version }
 
   outputs:
-    label:
-      value: Jupyter
-    jupyter_endpoint:
-      value: { concat: [ 'http://', get_attribute: [ vm_server, public_address, 0 ], ':8888' ]  }
     node_ip:
       value: { get_attribute: [ vm_server, public_address, 0 ] }
     node_creds:
       value: { get_attribute: [ vm_server, endpoint, credential, 0 ] }
+    jupyter_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":8888" ]}
+    grafana_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":3000" ]}
+
