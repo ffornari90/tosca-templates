@@ -59,6 +59,15 @@ topology_template:
       default: 4 GB
       required: yes
 
+    users:
+      type: list
+      description: list of users to create on the VM
+      entry_schema:
+        type: tosca.datatypes.indigo.User
+      default: []
+      required: false
+      
+
 
   node_templates:
 
@@ -97,6 +106,8 @@ topology_template:
 
     mesos_master_server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         endpoint:
           properties:
@@ -127,6 +138,8 @@ topology_template:
 
     mesos_slave_server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         scalable:
           properties:
@@ -143,6 +156,8 @@ topology_template:
 
     mesos_lb_server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         endpoint:
           properties:
@@ -175,3 +190,5 @@ topology_template:
       value: { get_attribute: [ mesos_lb_server, public_address ] }
     mesos_master:
       value: { get_attribute: [ mesos_master_server, public_address ] }
+    os_users:
+      value: { get_property: [ mesos_master_server, os_users, 0 ] }      
