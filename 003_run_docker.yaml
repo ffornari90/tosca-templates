@@ -45,6 +45,14 @@ topology_template:
     service_ports:
       type: integer
       default: "8080"
+ 
+    users:
+      type: list
+      description: list of users to create on the VM
+      entry_schema:
+        type: tosca.datatypes.indigo.User
+      default: []
+      required: false      
 
     environment_variables:
       required: no
@@ -60,6 +68,8 @@ topology_template:
 
     simple_node:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         endpoint:
           properties:
@@ -98,3 +108,5 @@ topology_template:
       value: { get_attribute: [ simple_node, public_address, 0 ] }
     node_creds:
       value: { get_attribute: [ simple_node, endpoint, credential, 0 ] }
+    os_users:
+      value: { get_property: [ simple_node, os_users, 0 ] }  

@@ -90,6 +90,14 @@ topology_template:
       required: yes
       description: password for SMTP
 
+    users:
+      type: list
+      description: list of users to create on the VM
+      entry_schema:
+        type: tosca.datatypes.indigo.User
+      default: []
+      required: false  
+
   node_templates:
 
     s3_owncloud_bucket:
@@ -140,6 +148,8 @@ topology_template:
 
     server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         endpoint:
           properties:
@@ -180,3 +190,5 @@ topology_template:
       value: { get_attribute: [ server, public_address, 0 ] }
     node_creds:
       value: { get_attribute: [ server, endpoint, credential, 0 ] }
+    os_users:
+      value: { get_property: [ server, os_users, 0 ] }  

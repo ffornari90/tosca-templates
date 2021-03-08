@@ -49,6 +49,14 @@ topology_template:
       constraints:
          - valid_values: [ 18.04 ]
 
+    users:
+      type: list
+      description: list of users to create on the VM
+      entry_schema:
+        type: tosca.datatypes.indigo.User
+      default: []
+      required: false           
+
     iam_url:
       type: string
       default: "https://iam.cloud.infn.it"
@@ -139,6 +147,8 @@ topology_template:
 
     vm_server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         endpoint:
           properties:
@@ -165,3 +175,5 @@ topology_template:
       value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":8888" ]}
     grafana_endpoint:
       value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":3000" ]}
+    os_users:
+      value: { get_property: [ vm_server, os_users, 0 ] }  

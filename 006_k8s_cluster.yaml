@@ -63,6 +63,14 @@ topology_template:
         type: tosca.datatypes.network.PortSpec
       description: Ports to open on the K8s master VM
 
+    users:
+      type: list
+      description: list of users to create on the VM
+      entry_schema:
+        type: tosca.datatypes.indigo.User
+      default: []
+      required: false  
+
   node_templates:
 
     pub_network:
@@ -118,6 +126,8 @@ topology_template:
 
     k8s_master_server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         endpoint:
           properties:
@@ -138,6 +148,8 @@ topology_template:
 
     k8s_node_server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         scalable:
           properties:
@@ -175,3 +187,5 @@ topology_template:
       value: { get_attribute: [ k8s_node_server, private_address ] }
     k8s_wn_node_creds:
       value: { get_attribute: [ k8s_node_server, endpoint, credential ] }
+    os_users:
+      value: { get_property: [ k8s_master_server, os_users, 0 ] }  

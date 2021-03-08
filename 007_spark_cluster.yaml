@@ -61,7 +61,13 @@ topology_template:
       description: "S3 endpoint (http://endpoint:9000)"
       default: "https://minio.cloud.infn.it/"
 
-
+    users:
+      type: list
+      description: list of users to create on the VM
+      entry_schema:
+        type: tosca.datatypes.indigo.User
+      default: []
+      required: false
 
   node_templates:
 
@@ -138,6 +144,8 @@ topology_template:
 
     k8s_master_server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         endpoint:
           properties:
@@ -162,6 +170,8 @@ topology_template:
 
     k8s_slave_server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         scalable:
           properties:
@@ -198,3 +208,5 @@ topology_template:
       value: { get_attribute: [ k8s_slave_server, endpoint, credential ] }
     grafana_endpoint:
       value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
+    os_users:
+      value: { get_property: [ k8s_master_server, os_users, 0 ] }  

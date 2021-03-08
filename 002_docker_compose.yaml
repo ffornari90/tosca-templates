@@ -53,6 +53,13 @@ topology_template:
       default: "https://paas.cloud.infn.it/public/tosca/docker-demo.yml"
       description: URL of the docker compose file to deploy
 
+    users:
+      type: list
+      description: list of users to create on the VM
+      entry_schema:
+        type: tosca.datatypes.indigo.User
+      default: []
+      required: false  
 
   node_templates:
 
@@ -93,6 +100,8 @@ topology_template:
 
     server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         endpoint:
           properties:
@@ -117,3 +126,5 @@ topology_template:
       value: { get_attribute: [ server, public_address, 0 ] }
     node_creds:
       value: { get_attribute: [ server, endpoint, credential, 0 ] }
+    os_users:
+      value: { get_property: [ server, os_users, 0 ] }      

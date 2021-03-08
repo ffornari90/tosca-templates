@@ -65,6 +65,14 @@ topology_template:
         type: tosca.datatypes.network.PortSpec
       description: Ports to open on the VM
 
+    users:
+      type: list
+      description: list of users to create on the VM
+      entry_schema:
+        type: tosca.datatypes.indigo.User
+      default: []
+      required: false      
+
   node_templates:
 
     pub_network:
@@ -114,6 +122,8 @@ topology_template:
 
     kibana_es_server:
       type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
       capabilities:
         endpoint:
           properties:
@@ -137,3 +147,5 @@ topology_template:
       value: { get_attribute: [ kibana_es_server, public_address, 0 ] }
     node_creds:
       value: { get_attribute: [ kibana_es_server, endpoint, credential, 0 ] }
+    os_users:
+      value: { get_property: [ kibana_es_server, os_users, 0 ] }      
