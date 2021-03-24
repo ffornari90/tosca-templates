@@ -7,9 +7,7 @@ description: >
   Deploy Galaxy docker image on a single Virtual Machine.
 
 metadata:
-  icon: https://raw.githubusercontent.com/bgruening/docker-galaxy-stable/dev/galaxy/GalaxyDocker.png 
   display_name: "Galaxy"
-  allowed_groups: "developers,beta-testers,orchestrator-admin"
 
 topology_template:
   inputs:

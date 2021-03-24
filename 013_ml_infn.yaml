@@ -7,8 +7,6 @@ description: Provision a single VM with all the ML-INFN envirnoment exposing bot
 
 metadata:
   display_name: Working Station for Machine Learning INFN (ML_INFN)
-  icon: https://paas.cloud.infn.it/public/images/ml_infn.png
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
 
 topology_template:
 

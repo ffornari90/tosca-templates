@@ -7,8 +7,6 @@ description: >
   Launch a compute node getting the IP and SSH credentials to access via ssh
 metadata:
   display_name: Virtual machine
-  icon: https://indigo-paas.cloud.ba.infn.it/public/images/vm-icon.png
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
 
 topology_template:
 

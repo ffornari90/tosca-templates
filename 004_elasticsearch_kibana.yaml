@@ -8,8 +8,6 @@ description: >
 
 metadata:
   display_name: Elasticsearch and Kibana
-  icon: https://2.bp.blogspot.com/-TfNbI0vJD-U/W7hpt3-HG0I/AAAAAAAAfn8/BZA5n7hNPlIGY5BM6igPIJvuzNkOk8Q3QCLcBGAs/s640/image-3.jpg
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
 
 topology_template:
 

@@ -7,8 +7,6 @@ description: Apache Mesos abstracts CPU, memory, storage, and other compute reso
 
 metadata:
   display_name: Apache Mesos cluster
-  icon: https://paas.cloud.infn.it/public/images/apache-mesos-icon.png
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
 
 topology_template:
 

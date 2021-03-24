@@ -8,9 +8,6 @@ description: >
 
 metadata:
   display_name: TensorFlow with Jupyter
-  icon: https://paas.cloud.infn.it/public/images/tensorflow.png
-  tag: GPU
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
 
 topology_template:
 

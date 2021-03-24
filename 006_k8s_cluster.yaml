@@ -7,8 +7,6 @@ description: Deploy a single master Kubernetes 1.19.6 cluster
 
 metadata:
   display_name: Kubernetes cluster
-  icon: https://baltig.infn.it/infn-cloud/tosca-templates/-/raw/master/images/kubernetes.png
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
   template_type: "kubernetes"
 
 topology_template:

@@ -9,8 +9,6 @@ description: >
 
 metadata:
   display_name: Virtual machine with encrypted volume
-  icon: https://paas.cloud.infn.it/public/images/vm_with_blockdevice_encrypted.png
-  allowed_groups: "developers,orchestrator-admin"
 
 topology_template:
   inputs:

@@ -7,8 +7,6 @@ description: Run a docker container
 
 metadata:
   display_name: Run docker
-  icon: https://paas.cloud.infn.it/public/images/docker.png
-  allowed_groups: "developers,orchestrator-admin"
 
 topology_template:
 

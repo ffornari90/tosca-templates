@@ -7,8 +7,6 @@ description: Deploy a pool of virtual machines configuring Kubernetes for the ex
 
 metadata:
   display_name: Data processing Cluster - HTCondor+CVMFS+NFS
-  icon: https://paas.cloud.infn.it/public/images/HTCondor.png
-  allowed_groups: "developers,orchestrator-admin"
   template_type: "kubernetes"
 
 topology_template:

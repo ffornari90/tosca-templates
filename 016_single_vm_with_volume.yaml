@@ -8,8 +8,6 @@ description: >
 
 metadata:
   display_name: Virtual machine with block device
-  icon: https://indigo-paas.cloud.ba.infn.it/public/images/vm_with_blockdevice.png
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
 
 topology_template:
 

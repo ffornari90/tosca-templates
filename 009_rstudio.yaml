@@ -8,8 +8,6 @@ description: >
 
 metadata:
   display_name: RStudio
-  icon: https://paas.cloud.infn.it/public/images/rstudio.png
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
 
 topology_template:
 

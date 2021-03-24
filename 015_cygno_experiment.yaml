@@ -7,8 +7,6 @@ description: >
   Run a single VM with CYGNO Environment prepared exposing both ssh access and JupyterHub interface. 
 metadata:
   display_name: Working Station for CYGNO Experiment
-  icon:  https://paas.cloud.infn.it/public/images/cygno.png
-  allowed_groups: "beta-testers,developers,orchestrator-admin,cygno"
 
 topology_template:
 

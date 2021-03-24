@@ -8,8 +8,6 @@ description: >
 
 metadata:
   display_name: Docker-compose
-  icon: https://paas.cloud.infn.it/public/images/docker-compose.png
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
 
 topology_template:
 

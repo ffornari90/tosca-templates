@@ -7,8 +7,6 @@ description: Deploy a complete Spark 3.0.1 + Jupyter Notebook on top of a Kubern
 
 metadata:
   display_name: Spark + Jupyter cluster
-  icon: https://paas.cloud.infn.it/public/images/spark.png
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
   template_type: "kubernetes"
 
 topology_template:

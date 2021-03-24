@@ -8,7 +8,6 @@ description: >
 
 metadata:
   display_name: Sync&Share aaS
-  icon: https://paas.cloud.infn.it/public/images/cloud_storage.jpg
 
 topology_template:
 

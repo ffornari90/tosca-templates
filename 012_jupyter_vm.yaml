@@ -7,8 +7,6 @@ description: Run Jupyter on a single VM enabling Notebooks persistence
 
 metadata:
   display_name: Jupyter with persistence for Notebooks
-  icon: https://paas.cloud.infn.it/public/images/jupyter_s3.png
-  allowed_groups: "beta-testers,developers,orchestrator-admin"
 
 topology_template:
 
