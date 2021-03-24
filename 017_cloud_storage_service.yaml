@@ -7,7 +7,7 @@ description: >
   Deploy a cloud storage service
 
 metadata:
-  display_name: Cloud Storage Service
+  display_name: Sync&Share aaS
   icon: https://paas.cloud.infn.it/public/images/cloud_storage.jpg
 
 topology_template:
