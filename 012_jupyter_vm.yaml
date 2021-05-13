@@ -65,7 +65,7 @@ topology_template:
 
     jupyter_images:
       type: string
-      default: "dodasts/persistent-storage-base:v1"
+      default: "dodasts/persistent-storage-base:v3"
       description: Default image 
 
     ports:
