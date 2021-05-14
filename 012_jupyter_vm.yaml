@@ -50,12 +50,12 @@ topology_template:
 
     iam_url:
       type: string
-      default: "https://iam.cloud.infn.it"
+      default: "https://login.cloud.infn.it"
       description: IAM Instance for end user authentication
 
     iam_groups:
       type: string
-      default: "beta-testers"
+      default: ""
       description: IAM groups for authorization management
 
     iam_admin_groups:
@@ -65,7 +65,7 @@ topology_template:
 
     jupyter_images:
       type: string
-      default: "dodasts/persistent-storage-base:v1"
+      default: "dodasts/persistent-storage-base:v3"
       description: Default image 
 
     ports:
