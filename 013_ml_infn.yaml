@@ -3,10 +3,10 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
 
-description: Provision a single VM with all the ML-INFN envirnoment exposing both ssh access and JupyterHub and monitoring
+description: Run a single VM with exposing both ssh access and multiuser JupyterHub interface, integrating the ML-INFN envirnoment
 
 metadata:
-  display_name: Working Station for Machine Learning INFN (ML_INFN)
+  display_name: Computational enviroment for Machine Learning INFN (ML_INFN)
 
 topology_template:
 
@@ -18,6 +18,11 @@ topology_template:
       default: 2
       constraints:
       - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+
+    use_gpu:
+      type: boolean
+      default: true
+      description: Enable GPU driver installation        
 
     num_gpus:
       type: integer
@@ -32,6 +37,12 @@ topology_template:
       default: 4 GB
       constraints:
       - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB ]
+
+    disk_size:
+      type: scalar-unit.size
+      description: Size of the local disk available to applications running on the VM
+      default: 50 GB
+      required: yes      
 
     os_distribution:
       type: string
@@ -84,11 +95,6 @@ topology_template:
       type: string
       default: "cms.cern.ch sft.cern.ch atlas.cern.ch"
       description: CMFS repositories to mount  
-
-    use_gpu:
-      type: boolean
-      default: true
-      description: Enable GPU driver installation
 
     ports:
       description:
@@ -159,6 +165,7 @@ topology_template:
             num_cpus: { get_input: num_cpus }
             mem_size: { get_input: mem_size }
             num_gpus: { get_input: num_gpus }
+            disk_size: { get_input: disk_size }
         os:
           properties:
             distribution: { get_input: os_distribution }
@@ -167,8 +174,6 @@ topology_template:
   outputs:
     node_ip:
       value: { get_attribute: [ vm_server, public_address, 0 ] }
-    node_creds:
-      value: { get_attribute: [ vm_server, endpoint, credential, 0 ] }
     jupyter_endpoint:
       value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":8888" ]}
     grafana_endpoint:
