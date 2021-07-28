@@ -50,17 +50,17 @@ topology_template:
 
     iam_url:
       type: string
-      default: "https://login.cloud.infn.it"
+      default: "https://iam.cloud.infn.it"
       description: IAM Instance for end user authentication
 
     iam_groups:
       type: string
-      default: ""
+      default: "end-users-catchall"
       description: IAM groups for authorization management
 
     iam_admin_groups:
       type: string
-      default: "beta-testers"
+      default: "infn-cloud-catchall"
       description: IAM groups for JupyterHub ADMIN authorization management
 
     jupyter_images:

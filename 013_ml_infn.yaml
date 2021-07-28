@@ -73,12 +73,12 @@ topology_template:
 
     iam_groups:
       type: string
-      default: "beta-testers"
+      default: "ml-infn-users"
       description: IAM groups for authorization management
 
     iam_admin_groups:
       type: string
-      default: "beta-testers"
+      default: "ml-infn"
       description: IAM groups for JupyterHub ADMIN authorization management
 
     jupyter_repo_url:
