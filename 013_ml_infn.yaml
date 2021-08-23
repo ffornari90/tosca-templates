@@ -88,7 +88,7 @@ topology_template:
 
     jupyter_images:
       type: string
-      default: "dodasts/mlinfn-base:v1 dodasts/mlinfn-conda-base:v2"
+      default: "dodasts/mlinfn-base:v6"
       description: Default image for jupyter server
 
     cvmfs_repos:

@@ -70,7 +70,7 @@ topology_template:
 
     jupyter_images:
       type: string
-      default: "dodasts/cygno-base:v1"
+      default: "dodasts/cygno-jupyter:v13"
       description: Default image 
 
     ports:
