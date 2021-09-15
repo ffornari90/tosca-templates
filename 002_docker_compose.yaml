@@ -48,7 +48,7 @@ topology_template:
 
     docker_compose_file_url:
       type: string
-      default: "https://paas.cloud.infn.it/public/tosca/docker-demo.yml"
+      default: "https://baltig.infn.it/infn-cloud/apps/-/raw/master/compose-example/docker-demo.yaml"
       description: URL of the docker compose file to deploy
 
     users:
