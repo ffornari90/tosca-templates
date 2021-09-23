@@ -86,7 +86,7 @@ topology_template:
         os:
           properties:
             distribution: ubuntu
-            version: 16.04
+            version: 20.04
             type: linux
  
     simple_docker:
