@@ -34,10 +34,10 @@ topology_template:
 
     os_version:
       type: version
-      default: 16.04
+      default: 20.04
       description: Operating System distribution version
       constraints:
-         - valid_values: [ 16.04, 18.04, 7 ]
+         - valid_values: [ 18.04, 20.04, 7 ]
 
     users:
       type: list

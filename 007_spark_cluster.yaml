@@ -164,7 +164,7 @@ topology_template:
         os:
           properties:
             distribution: ubuntu
-            version: 16.04
+            version: 20.04
 
     k8s_slave_server:
       type: tosca.nodes.indigo.Compute
@@ -181,7 +181,7 @@ topology_template:
         os:
           properties:
             distribution: ubuntu
-            version: 16.04
+            version: 20.04
 
   policies:
     - deploy_on_specific_site:

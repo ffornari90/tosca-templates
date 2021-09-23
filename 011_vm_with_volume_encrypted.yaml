@@ -64,7 +64,7 @@ topology_template:
 
     os_version:
       type: version
-      default: 16.04
+      default: 20.04
       description: Operating System distribution version
 
   node_templates:

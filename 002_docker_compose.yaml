@@ -113,7 +113,7 @@ topology_template:
           properties:
             distribution: ubuntu
             type: linux
-            version: 16.04
+            version: 20.04
 
   outputs:
 #    label:

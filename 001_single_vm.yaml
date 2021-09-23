@@ -31,10 +31,10 @@ topology_template:
 
     os_version:
       type: version
-      default: 16.04
+      default: 20.04
       description: Operating System distribution version
       constraints:
-         - valid_values: [ 16.04, 18.04, 7 ]
+         - valid_values: [ 18.04, 20.04, 7 ]
 
     service_ports:
       type: map
@@ -102,7 +102,6 @@ topology_template:
             mem_size: { get_input: mem_size }
         os:
           properties:
-            #image: ubuntu-16.04
             distribution: { get_input: os_distribution }
             version: { get_input: os_version }
 

@@ -146,9 +146,8 @@ topology_template:
         # Guest Operating System properties
         os:
           properties:
-            #image: ubuntu-16.04-vmi 
             distribution: ubuntu
-            version: 16.04
+            version: 20.04
       requirements:
         # contextually this can only be a relationship type
         - local_storage:
