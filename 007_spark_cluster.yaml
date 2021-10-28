@@ -183,11 +183,6 @@ topology_template:
             distribution: ubuntu
             version: 20.04
 
-  policies:
-    - deploy_on_specific_site:
-        type: tosca.policies.indigo.SlaPlacement
-        properties:
-          sla_id: 7868ea9d-16d1-4aa7-81ca-613fde477a08
 
   outputs:
     k8s_dashboard:
