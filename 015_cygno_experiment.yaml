@@ -80,6 +80,16 @@ topology_template:
       entry_schema:
         type: tosca.datatypes.network.PortSpec
 
+    mountpoint:
+      type: string
+      default: /var/lib/docker/
+      description: Path to mount the volume
+
+    volume_size:
+      type: scalar-unit.size
+      description: Size of the volume to be attached
+      default: 10 GB
+
   node_templates:
     ml_install:
       type: tosca.nodes.DODAS.single-node-jupyterhub
@@ -138,6 +148,20 @@ topology_template:
           properties:
             distribution: { get_input: os_distribution }
             version: { get_input: os_version }
+      requirements:
+        - local_storage:
+            node: block_device
+            capability: tosca.capabilities.Attachment
+            relationship:
+              type: tosca.relationships.AttachesTo
+              properties:
+                location: { get_input: mountpoint }
+                device: vdb
+
+    block_device:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: volume_size }
 
   outputs:
     node_ip:
