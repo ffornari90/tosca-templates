@@ -9,54 +9,47 @@ metadata:
   display_name: Computational enviroment for Machine Learning INFN (ML_INFN)
 
 topology_template:
-
   inputs:
-
     num_cpus:
       type: integer
       description: Number of virtual cpus for the VM
       default: 2
       constraints:
-      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
-
-    use_gpu:
-      type: boolean
-      default: true
-      description: Enable GPU driver installation        
+        - valid_values: [2, 4, 8, 16, 32, 64]
 
     num_gpus:
       type: integer
       description: Number of GPUs for the VM
       default: 0
       constraints:
-      - valid_values: [ 0, 1, 2]
+        - valid_values: [0, 1, 2]
 
     mem_size:
       type: scalar-unit.size
       description: Amount of memory for the VM
       default: 4 GB
       constraints:
-      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB ]
+        - valid_values: [4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB]
 
     disk_size:
       type: scalar-unit.size
       description: Size of the local disk available to applications running on the VM
       default: 50 GB
-      required: yes      
+      required: yes
 
     os_distribution:
       type: string
       default: ubuntu
       description: Operating System distro
       constraints:
-         - valid_values: [ "ubuntu" ]
+        - valid_values: ["ubuntu"]
 
     os_version:
       type: version
-      default: 18.04
+      default: 20.04
       description: Operating System distribution version
       constraints:
-         - valid_values: [ 18.04 ]
+        - valid_values: [20.04]
 
     users:
       type: list
@@ -64,7 +57,7 @@ topology_template:
       entry_schema:
         type: tosca.datatypes.indigo.User
       default: []
-      required: false           
+      required: false
 
     iam_url:
       type: string
@@ -81,45 +74,67 @@ topology_template:
       default: "ml-infn"
       description: IAM groups for JupyterHub ADMIN authorization management
 
-    jupyter_repo_url:
-      type: string
-      default: "https://github.com/DODAS-TS/jupyterhub-ML_INFN.git"
-      description: Repo url for customized jupyter hub configuration 
-
     jupyter_images:
       type: string
-      default: "dodasts/mlinfn-base:v6"
+      default: "dodasts/ml-infn-lab:v1.0.0-snj"
       description: Default image for jupyter server
+
+    jupyter_use_gpu:
+      type: boolean
+      default: true
+      description: Enable GPU utilization on jupyter
+
+    jupyterlab_collaborative:
+      type: boolean
+      default: false
+      description: enable the jupyter collaborative service
+
+    jupyterlab_collaborative_use_gpu:
+      type: boolean
+      default: false
+      description: enable the GPU on jupyter collaborative service
+
+    jupyterlab_collaborative_image:
+      type: string
+      default: "dodasts/ml-infn-jlabc:v1.0.0-snj"
+      description: Default image for jupyter collaborative service
 
     cvmfs_repos:
       type: string
       default: "cms.cern.ch sft.cern.ch atlas.cern.ch"
-      description: CMFS repositories to mount  
+      description: CMFS repositories to mount
 
     ports:
-      description:
+      description: Ports to open on the VM
       type: map
       required: false
-      default: { "jupyter": { "protocol": "tcp", "source": 8888 }, "grafana": { "protocol": "tcp", "source": 3000 } }
+      default:
+        {
+          "jupyter": { "protocol": "tcp", "source": 8888 },
+          "jupyter-collaborative": { "protocol": "tcp", "source": 8889 },
+          "grafana": { "protocol": "tcp", "source": 3000 },
+        }
       constraints:
         - min_length: 0
       entry_schema:
         type: tosca.datatypes.network.PortSpec
-      description: Ports to open on the VM
 
   node_templates:
-
     ml_install:
       type: tosca.nodes.DODAS.single-node-jupyterhub
       properties:
-        use_gpu: { get_input: use_gpu }
         iam_url: { get_input: iam_url }
         iam_groups: { get_input: iam_groups }
         iam_admin_groups: { get_input: iam_admin_groups }
         jupyter_images: { get_input: jupyter_images }
-        jupyter_repo_url: { get_input: jupyter_repo_url }
+        jupyter_use_gpu: { get_input: jupyter_use_gpu }
+        jupyterlab_collaborative: { get_input: jupyterlab_collaborative }
+        jupyterlab_collaborative_use_gpu:
+          { get_input: jupyterlab_collaborative_use_gpu }
+        jupyterlab_collaborative_image:
+          { get_input: jupyterlab_collaborative_image }
         cvmfs_repos: { get_input: cvmfs_repos }
-        server_ip: { get_attribute: [ HOST, public_address, 0 ] }
+        server_ip: { get_attribute: [HOST, public_address, 0] }
       requirements:
         - host: vm_server
 
@@ -173,10 +188,26 @@ topology_template:
 
   outputs:
     node_ip:
-      value: { get_attribute: [ vm_server, public_address, 0 ] }
+      value: { get_attribute: [vm_server, public_address, 0] }
     jupyter_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":8888" ]}
+      value:
+        {
+          concat:
+            [
+              "https://",
+              get_attribute: [vm_server, public_address, 0],
+              ":8888",
+            ],
+        }
     grafana_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":3000" ]}
+      value:
+        {
+          concat:
+            [
+              "https://",
+              get_attribute: [vm_server, public_address, 0],
+              ":3000",
+            ],
+        }
     os_users:
-      value: { get_property: [ vm_server, os_users, 0 ] }  
+      value: { get_property: [vm_server, os_users, 0] }
