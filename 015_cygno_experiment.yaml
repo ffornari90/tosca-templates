@@ -4,41 +4,39 @@ imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
 
 description: >
-  Run a single VM with CYGNO Environment prepared exposing both ssh access and JupyterHub interface. 
+  Run a single VM with CYGNO Environment prepared exposing both ssh access and JupyterHub interface.
 metadata:
   display_name: Working Station for CYGNO Experiment
 
 topology_template:
-
   inputs:
-
     num_cpus:
       type: integer
       description: Number of virtual cpus for the VM
       default: 2
       constraints:
-      - valid_values: [ 2, 4, 8, 16 ]
+        - valid_values: [2, 4, 8, 16]
 
     mem_size:
       type: scalar-unit.size
       description: Amount of memory for the VM
       default: 4 GB
       constraints:
-      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB ]
+        - valid_values: [4 GB, 8 GB, 16 GB, 32 GB]
 
     os_distribution:
       type: string
       default: ubuntu
       description: Operating System distro
       constraints:
-         - valid_values: [ "ubuntu" ]
+        - valid_values: ["ubuntu"]
 
     os_version:
       type: version
-      default: 18.04
+      default: 20.04
       description: Operating System distribution version
       constraints:
-         - valid_values: [ 18.04 ]
+        - valid_values: [20.04]
 
     users:
       type: list
@@ -46,7 +44,7 @@ topology_template:
       entry_schema:
         type: tosca.datatypes.indigo.User
       default: []
-      required: false       
+      required: false
 
     iam_url:
       type: string
@@ -63,29 +61,26 @@ topology_template:
       default: "cygno"
       description: IAM groups for JupyterHub ADMIN authorization management
 
-    jupyter_repo_url:
-      type: string
-      default: "https://github.com/DODAS-TS/jupyterhub_CYGNO.git"
-      description: Repo url for customized jupyter hub configuration 
-
     jupyter_images:
       type: string
-      default: "dodasts/cygno-jupyter:v13"
-      description: Default image 
+      default: "dodasts/cygno-lab:v1.0.0-snj"
+      description: Default image for jupyter server
 
     ports:
-      description:
+      description: Ports to open on the VM
       type: map
       required: false
-      default: { "jupyter": { "protocol": "tcp", "source": 8888 }, "grafana": { "protocol": "tcp", "source": 3000 } }
+      default:
+        {
+          "jupyter": { "protocol": "tcp", "source": 8888 },
+          "grafana": { "protocol": "tcp", "source": 3000 },
+        }
       constraints:
         - min_length: 0
       entry_schema:
         type: tosca.datatypes.network.PortSpec
-      description: Ports to open on the VM
 
   node_templates:
-
     ml_install:
       type: tosca.nodes.DODAS.single-node-jupyterhub
       properties:
@@ -93,8 +88,8 @@ topology_template:
         iam_groups: { get_input: iam_groups }
         iam_admin_groups: { get_input: iam_admin_groups }
         jupyter_images: { get_input: jupyter_images }
-        jupyter_repo_url: { get_input: jupyter_repo_url }
-        server_ip: { get_attribute: [ HOST, public_address, 0 ] }
+        jupyter_post_start_cmd: "/usr/local/share/dodasts/script/post_script.sh"
+        server_ip: { get_attribute: [HOST, public_address, 0] }
       requirements:
         - host: vm_server
 
@@ -146,12 +141,28 @@ topology_template:
 
   outputs:
     node_ip:
-      value: { get_attribute: [ vm_server, public_address, 0 ] }
+      value: { get_attribute: [vm_server, public_address, 0] }
     node_creds:
-      value: { get_attribute: [ vm_server, endpoint, credential, 0 ] }
+      value: { get_attribute: [vm_server, endpoint, credential, 0] }
     jupyter_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":8888" ]}
+      value:
+        {
+          concat:
+            [
+              "https://",
+              get_attribute: [vm_server, public_address, 0],
+              ":8888",
+            ],
+        }
     grafana_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],":3000" ]}
+      value:
+        {
+          concat:
+            [
+              "https://",
+              get_attribute: [vm_server, public_address, 0],
+              ":3000",
+            ],
+        }
     os_users:
-      value: { get_property: [ vm_server, os_users, 0 ] }  
+      value: { get_property: [vm_server, os_users, 0] }
