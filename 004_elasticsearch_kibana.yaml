@@ -134,7 +134,7 @@ topology_template:
           properties:
             distribution: ubuntu
             type: linux
-            version: 18.04
+            version: 20.04
 
   outputs:
     kibana_endpoint:
