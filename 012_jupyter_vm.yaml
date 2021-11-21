@@ -100,6 +100,7 @@ topology_template:
         iam_admin_groups: { get_input: iam_admin_groups }
         jupyter_images: { get_input: jupyter_images }
         jupyterlab_collaborative: { get_input: jupyterlab_collaborative }
+        jupyter_post_start_cmd: "/usr/local/share/dodasts/script/post_script.sh"
         jupyterlab_collaborative_image:
           { get_input: jupyterlab_collaborative_image }
         server_ip: { get_attribute: [HOST, public_address, 0] }
