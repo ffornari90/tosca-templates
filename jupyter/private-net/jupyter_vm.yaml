@@ -104,7 +104,7 @@ topology_template:
         jupyter_post_start_cmd: "/usr/local/share/dodasts/script/post_script.sh"
         jupyterlab_collaborative_image:
           { get_input: jupyterlab_collaborative_image }
-        server_ip: { get_attribute: [HOST, public_address, 0] }
+        server_ip: { get_attribute: [HOST, private_address, 0] }
       requirements:
         - host: vm_server
 
