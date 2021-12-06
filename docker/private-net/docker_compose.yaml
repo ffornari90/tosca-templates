@@ -1,10 +1,11 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/improve_docker_compose/custom_types.yaml
 
 description: >
-  Run a docker compose file fetched from the specified URL
+  Deploy a virtual machine with docker engine and docker-compose pre-installed.
+  Optionally run a docker compose file fetched from the specified URL. 
 
 metadata:
   display_name: Docker-compose
@@ -16,10 +17,16 @@ topology_template:
       type: integer
       description: Number of virtual cpus for the VM
       default: 2
+
     mem_size:
       type: scalar-unit.size
       description: Amount of memory for the VM
       default: 4 GB
+
+    docker_compose_file_url:
+      type: string
+      default: ""
+      description: URL of the docker compose file to deploy
 
     project_name:
       type: string
@@ -46,11 +53,6 @@ topology_template:
         type: tosca.datatypes.network.PortSpec
       description: Ports to open to access the service(s)
 
-    docker_compose_file_url:
-      type: string
-      default: "https://baltig.infn.it/infn-cloud/apps/-/raw/master/compose-example/docker-demo.yaml"
-      description: URL of the docker compose file to deploy
-
     users:
       type: list
       description: list of users to create on the VM
@@ -60,7 +62,6 @@ topology_template:
       required: false  
 
   node_templates:
-
 
     priv_network:
       type: tosca.nodes.indigo.network.Network
@@ -103,9 +104,9 @@ topology_template:
             version: 20.04
 
   outputs:
-    ports:
-      value: { get_input: service_ports }
     node_ip:
       value: { get_attribute: [ server, private_address, 0 ] }
+    node_creds:
+      value: { get_attribute: [ server, endpoint, credential, 0 ] }
     os_users:
-      value: { get_property: [ server, os_users, 0 ] }      
+      value: { get_property: [ server, os_users, 0 ] }  
