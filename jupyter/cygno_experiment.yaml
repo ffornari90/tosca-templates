@@ -24,20 +24,6 @@ topology_template:
       constraints:
         - valid_values: [4 GB, 8 GB, 16 GB, 32 GB]
 
-    os_distribution:
-      type: string
-      default: ubuntu
-      description: Operating System distro
-      constraints:
-        - valid_values: ["ubuntu"]
-
-    os_version:
-      type: version
-      default: 20.04
-      description: Operating System distribution version
-      constraints:
-        - valid_values: [20.04]
-
     users:
       type: list
       description: list of users to create on the VM
@@ -156,8 +142,8 @@ topology_template:
             mem_size: { get_input: mem_size }
         os:
           properties:
-            distribution: { get_input: os_distribution }
-            version: { get_input: os_version }
+            distribution: ubuntu
+            version: 20.04
       requirements:
         - local_storage:
             node: block_device_docker

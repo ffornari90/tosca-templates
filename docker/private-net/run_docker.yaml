@@ -64,14 +64,26 @@ topology_template:
       
   node_templates:
 
-    simple_node:
+    priv_network:
+      type: tosca.nodes.indigo.network.Network
+      properties:
+        network_type: private
+
+    server_priv_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 0
+      requirements:
+        - binding: server
+        - link: priv_network
+
+    server:
       type: tosca.nodes.indigo.Compute
       properties:
         os_users: { get_input: users }
       capabilities:
         endpoint:
           properties:
-            network_name: PUBLIC
             ports:
               user_port:
                 protocol: tcp
@@ -99,12 +111,10 @@ topology_template:
         docker_command: { get_input: docker_command }
         environment_variables: { get_input: environment_variables }
       requirements:
-        - host: simple_node 
+        - host: server
  
   outputs:
     node_ip:
-      value: { get_attribute: [ simple_node, public_address, 0 ] }
-    node_creds:
-      value: { get_attribute: [ simple_node, endpoint, credential, 0 ] }
+      value: { get_attribute: [ server, private_address, 0 ] }
     os_users:
-      value: { get_property: [ simple_node, os_users, 0 ] }  
+      value: { get_property: [ server, os_users, 0 ] }  
