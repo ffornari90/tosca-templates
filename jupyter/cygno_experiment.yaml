@@ -24,20 +24,6 @@ topology_template:
       constraints:
         - valid_values: [4 GB, 8 GB, 16 GB, 32 GB]
 
-    os_distribution:
-      type: string
-      default: ubuntu
-      description: Operating System distro
-      constraints:
-        - valid_values: ["ubuntu"]
-
-    os_version:
-      type: version
-      default: 20.04
-      description: Operating System distribution version
-      constraints:
-        - valid_values: [20.04]
-
     users:
       type: list
       description: list of users to create on the VM
@@ -80,15 +66,25 @@ topology_template:
       entry_schema:
         type: tosca.datatypes.network.PortSpec
 
-    mountpoint:
+    mountpoint_docker:
       type: string
       default: /var/lib/docker/
-      description: Path to mount the volume
+      description: Path to mount the volume for docker
 
-    volume_size:
+    mountpoint_data:
+      type: string
+      default: /data
+      description: Path to mount the volume for data
+
+    volume_size_docker:
       type: scalar-unit.size
       description: Size of the volume to be attached
-      default: 10 GB
+      default: 100 GB
+
+    volume_size_data:
+      type: scalar-unit.size
+      description: Size of the volume to be attached
+      default: 200 GB
 
   node_templates:
     ml_install:
@@ -146,22 +142,33 @@ topology_template:
             mem_size: { get_input: mem_size }
         os:
           properties:
-            distribution: { get_input: os_distribution }
-            version: { get_input: os_version }
+            distribution: ubuntu
+            version: 20.04
       requirements:
         - local_storage:
-            node: block_device
+            node: block_device_docker
             capability: tosca.capabilities.Attachment
             relationship:
               type: tosca.relationships.AttachesTo
               properties:
-                location: { get_input: mountpoint }
-                device: vdb
+                location: { get_input: mountpoint_docker }
+        - local_storage:
+            node: block_device_data
+            capability: tosca.capabilities.Attachment
+            relationship:
+              type: tosca.relationships.AttachesTo
+              properties:
+                location: { get_input: mountpoint_data }
 
-    block_device:
+    block_device_docker:
       type: tosca.nodes.BlockStorage
       properties:
-        size: { get_input: volume_size }
+        size: { get_input: volume_size_docker }
+
+    block_device_data:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: volume_size_data }
 
   outputs:
     node_ip:
