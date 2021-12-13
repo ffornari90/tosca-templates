@@ -95,6 +95,7 @@ topology_template:
         iam_admin_groups: { get_input: iam_admin_groups }
         jupyter_images: { get_input: jupyter_images }
         jupyter_post_start_cmd: "/usr/local/share/dodasts/script/post_script.sh"
+        jupyter_host_mount_dir: { get_input: mountpoint_data } 
         server_ip: { get_attribute: [HOST, public_address, 0] }
       requirements:
         - host: vm_server
