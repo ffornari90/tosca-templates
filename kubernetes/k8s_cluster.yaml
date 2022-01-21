@@ -122,6 +122,8 @@ topology_template:
       type: tosca.nodes.indigo.Compute
       properties:
         os_users: { get_input: users }
+        tags:
+          ENDPOINTS: "dashboard#grafana"
       capabilities:
         endpoint:
           properties:
@@ -138,7 +140,6 @@ topology_template:
           properties:
             distribution: ubuntu
             version: 20.04
-            #image: "ost://keystone.cloud.infn.it/9e6c6447-e51b-4c49-a136-df3473b8090e"
 
     k8s_node_server:
       type: tosca.nodes.indigo.Compute

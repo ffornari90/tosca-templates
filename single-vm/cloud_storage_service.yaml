@@ -149,6 +149,8 @@ topology_template:
       type: tosca.nodes.indigo.Compute
       properties:
         os_users: { get_input: users }
+        tags:
+          ENDPOINTS: "data#status#backup"
       capabilities:
         endpoint:
           properties:
