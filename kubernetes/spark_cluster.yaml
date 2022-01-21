@@ -144,6 +144,8 @@ topology_template:
       type: tosca.nodes.indigo.Compute
       properties:
         os_users: { get_input: users }
+        tags:
+          ENDPOINTS: "dashboard#api-kubernetes#jhub#grafana"
       capabilities:
         endpoint:
           properties:
