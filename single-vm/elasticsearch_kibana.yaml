@@ -7,17 +7,20 @@ description: >
   Deploy a virtual machine pre-configured with the Elasticsearch search and analytics engine and with Kibana for simple visualization of data with charts and graphs in Elasticsearch
 
 metadata:
-  display_name: Elasticsearch and Kibana
+  display_name: Elasticsearch and Kibana (version 8.0.0)
+
 
 topology_template:
 
   inputs:
+
     num_cpus:
       type: integer
       description: Number of virtual cpus for the VM
       default: 2
       constraints:
       - valid_values: [ 2, 4 ]
+
     mem_size:
       type: scalar-unit.size
       description: Amount of memory for the VM
@@ -25,36 +28,31 @@ topology_template:
       constraints:
       - valid_values: [ 4 GB, 8 GB ]
 
-    version:
+    contact_email:
       type: string
-      default: 7.10.2
-      constraints:
-      - valid_values:
-        - 7.10.2
-        - 7.9.3
-        - 7.8.1
-      description: Elasticsearch version
+      required: yes
+      description: Insert your Email for receiving notifications
 
-    es_password:
+    elastic_password:
       type: string
-      required: true
+      required: yes
       description: Password for user elastic
 
     kibana_password:
       type: string
-      required: true
-      description: Password for kibana system user
+      required: yes
+      description: Password for user kibana_system (internal user)
 
-    ports:
-      description:
-      type: map
-      required: false
-      default: { "kibana": { "protocol": "tcp", "source": 5601 } }
-      constraints:
-        - min_length: 0
-      entry_schema:
-        type: tosca.datatypes.network.PortSpec
-      description: Ports to open on the VM
+    volume_size:
+      type: scalar-unit.size
+      description: Size of the volume to be used to store the data
+      default: 10 GB
+
+    mountpoint:
+      type: string
+      default: /data
+      description: Path to mount the data volume
+
 
     users:
       type: list
@@ -62,7 +60,7 @@ topology_template:
       entry_schema:
         type: tosca.datatypes.indigo.User
       default: []
-      required: false      
+      required: false
 
   node_templates:
 
@@ -92,33 +90,36 @@ topology_template:
         - binding: kibana_es_server
         - link: priv_network
 
-    elasticsearch:
-      type: tosca.nodes.indigo.Elasticsearch
-      properties:
-        es_version:  { get_input: version }
-        bind_address: "0.0.0.0"
-        elastic_password: { get_input: es_password }
-        kibana_system_password: { get_input: kibana_password }
-      requirements:
-        - host: kibana_es_server
 
-    kibana:
-      type: tosca.nodes.indigo.Kibana
+    docker_compose_service:
+      type: tosca.nodes.indigo.DockerCompose.Elastic
       properties:
-        kibana_version:  { get_input: version }
-        elasticsearch_password: { get_input: kibana_password }
+        project_name: elastic
+        environment_variables:
+          - ELASTIC_VERSION: "8.0.0"
+          - ELASTIC_PASSWORD: { get_input: elastic_password }
+          - KIBANA_PASSWORD: { get_input: kibana_password }
+          - CERT_EMAIL: { get_input: contact_email }
+          - DATA_DIR: { get_input: mountpoint }
       requirements:
         - host: kibana_es_server
-        - dependency: elasticsearch
 
     kibana_es_server:
       type: tosca.nodes.indigo.Compute
       properties:
         os_users: { get_input: users }
+        tags:
+          ENDPOINTS: "elastic#kibana"
       capabilities:
         endpoint:
           properties:
-            ports: { get_input: ports }
+            ports:
+              http:
+                protocol: tcp
+                source: 80
+              https:
+                protocol: tcp
+                source: 443
         host:
           properties:
             num_cpus: { get_input: num_cpus }
@@ -128,15 +129,32 @@ topology_template:
             distribution: ubuntu
             type: linux
             version: 20.04
+      requirements:
+        - local_storage:
+            node: block_device
+            capability: tosca.capabilities.Attachment
+            relationship:
+              type: tosca.relationships.AttachesTo
+              properties:
+                location: { get_input: mountpoint }
+                device: vdb
+
+    block_device:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: volume_size }
+
 
   outputs:
     kibana_endpoint:
-      value: { concat: [ 'http://', get_attribute: [ kibana_es_server, public_address, 0 ], ':5601' ] }
+      value: { concat: [ 'https://kibana.', get_attribute: [ kibana_es_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     kibana_username:
       value: elastic
+    elasticsearch_endpoint:
+      value: { concat: [ 'https://elastic.', get_attribute: [ kibana_es_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     node_ip:
       value: { get_attribute: [ kibana_es_server, public_address, 0 ] }
     node_creds:
       value: { get_attribute: [ kibana_es_server, endpoint, credential, 0 ] }
     os_users:
-      value: { get_property: [ kibana_es_server, os_users, 0 ] }      
+      value: { get_property: [ kibana_es_server, os_users, 0 ] }
