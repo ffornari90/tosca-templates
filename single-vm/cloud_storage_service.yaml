@@ -53,11 +53,10 @@ topology_template:
       required: yes
       description: Password for the admin user of the monitoring service
 
-    backup_webui_password:
+    backup_passphrase:
       type: string
       required: yes
-      description: Password for backup service Web UI login
-
+      description: Password for backup
 
     owncloud_bucket_name:
       type: string
@@ -89,13 +88,23 @@ topology_template:
       required: yes
       description: password for SMTP
 
+    iam_url:
+      type: string
+      default: https://iam.cloud.infn.it
+      description: IAM url      
+ 
+    iam_authorized_group:
+      type: string
+      required: yes
+      description: IAM group authorized to access the service     
+
     users:
       type: list
       description: list of users to create on the VM
       entry_schema:
         type: tosca.datatypes.indigo.User
       default: []
-      required: false  
+      required: false
 
   node_templates:
 
@@ -120,37 +129,37 @@ topology_template:
         - host: server
 
     docker_compose_service:
-      type: tosca.nodes.indigo.DockerCompose.CloudStorageService
+      type: tosca.nodes.indigo.CloudStorageService
       properties:
-        project_name: storageservice
-        docker_compose_file_url: "https://baltig.infn.it/infn-cloud/apps/-/raw/master/cloudstorage/docker-compose.yml"
         owncloud_hostname: { concat: [ "data.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
         nagios_hostname: { concat: [ "status.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
-        duplicati_hostname: { concat: [ "backup.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
-        s3_bucket: { get_property: [ s3_owncloud_bucket, bucket_name ] }
+        s3_data_bucket: { get_property: [ s3_owncloud_bucket, bucket_name ] }
+        s3_backup_bucket: { get_property: [ s3_backup_bucket, bucket_name ] }
         s3_access_key: { get_property: [ s3_owncloud_bucket, aws_access_key ] }
         s3_secret_key: { get_property: [ s3_owncloud_bucket, aws_secret_key ] }
         s3_endpoint: { get_property: [ s3_owncloud_bucket, s3_url ] }
-        environment_variables:
-          - OWNCLOUD_ADMIN_USERNAME: { get_input: owncloud_admin_username }
-          - OWNCLOUD_ADMIN_PASSWORD: { get_input: owncloud_admin_password }
-          - MYSQL_ROOT_PASSWORD: { get_input: mysql_root_password }
-          - NAGIOS_ADMIN_USERNAME: { get_input: monitoring_admin_username  }
-          - NAGIOS_ADMIN_PASSWORD: { get_input: monitoring_admin_password }
-          - DUPLICATI_WEBUI_PASSWORD: { get_input: backup_webui_password }
-          - CONTACT_EMAIL: { get_input: contact_email }
-          - SMTP_USERNAME: { get_input: smtp_username }
-          - SMTP_PASSWORD: { get_input: smtp_password }
+        owncloud_admin_user: { get_input: owncloud_admin_username }
+        owncloud_admin_passw: { get_input: owncloud_admin_password }
+        mysql_root_passw: { get_input: mysql_root_password }
+        nagios_admin_user: { get_input: monitoring_admin_username  }
+        nagios_admin_passw: { get_input: monitoring_admin_password }
+        backup_passphrase: { get_input: backup_passphrase  }
+        contact_email: { get_input: contact_email }
+        smtp_username: { get_input: smtp_username }
+        smtp_password: { get_input: smtp_password }
+        iam_url: { get_input: iam_url }
+        iam_group: { get_input: iam_authorized_group }
       requirements:
         - host: server
         - dependency: s3_owncloud_bucket
+        - dependency: s3_backup_bucket
 
     server:
       type: tosca.nodes.indigo.Compute
       properties:
         os_users: { get_input: users }
         tags:
-          ENDPOINTS: "data#status#backup"
+          ENDPOINTS: "data#status"
       capabilities:
         endpoint:
           properties:
@@ -183,8 +192,6 @@ topology_template:
       value: { concat: [ 'https://data.', get_attribute: [ server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     status_service_endpoint:
       value: { concat: [ 'https://status.', get_attribute: [ server, public_address, 0 ], '.myip.cloud.infn.it' ] }
-    backup_service_endpoint:
-      value: { concat: [ 'https://backup.', get_attribute: [ server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     backup_bucket_name:
       value: { get_property: [ s3_backup_bucket, bucket_name ] }
     node_ip:
@@ -192,4 +199,4 @@ topology_template:
     node_creds:
       value: { get_attribute: [ server, endpoint, credential, 0 ] }
     os_users:
-      value: { get_property: [ server, os_users, 0 ] }  
+      value: { get_property: [ server, os_users, 0 ] }
