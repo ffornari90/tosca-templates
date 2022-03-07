@@ -116,5 +116,7 @@ topology_template:
   outputs:
     node_ip:
       value: { get_attribute: [ server, private_address, 0 ] }
+    vpn_server:
+      value: { get_property: [ priv_network, proxy_host ] }  
     os_users:
       value: { get_property: [ server, os_users, 0 ] }  

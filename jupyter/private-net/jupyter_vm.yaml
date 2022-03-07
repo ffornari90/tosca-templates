@@ -144,6 +144,8 @@ topology_template:
   outputs:
     node_ip:
       value: { get_attribute: [vm_server, private_address, 0] }
+    vpn_server:
+      value: { get_property: [ priv_network, proxy_host ] }  
     jupyter_endpoint:
       value:
         {
