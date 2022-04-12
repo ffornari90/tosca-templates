@@ -197,6 +197,17 @@ topology_template:
 
           wn:
             enabled: true
+            affinity: |
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                      - schedd
+                      - master
+                  topologyKey: kubernetes.io/hostname
             replicas: 1
             image:
               name:  {{ wn_image }} 
