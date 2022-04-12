@@ -144,7 +144,7 @@ topology_template:
         iam_server: {get_input: iam_server }
         cluster_secret: {get_input: cluster_secret }
         helm_version: v3
-        inline_options: "--version 2.1.13"
+        inline_options: "--version 2.1.15"
         values_file: |
           # Default values for htcondor.
           # This is a YAML-formatted file.
