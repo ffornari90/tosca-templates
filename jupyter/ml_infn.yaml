@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/-/raw/master/tosca_types/applications/jupyter_types.yaml
 
 description: Run a single VM with exposing both ssh access and multiuser JupyterHub interface, integrating the ML-INFN envirnoment
 
@@ -23,6 +23,12 @@ topology_template:
       default: 0
       constraints:
         - valid_values: [0, 1, 2]
+
+    gpu_model:
+      type: string
+      default: ""
+      constraints:
+        - valid_values: [ "", "T4", "A30"]          
 
     mem_size:
       type: scalar-unit.size
@@ -117,7 +123,7 @@ topology_template:
       constraints:
         - min_length: 0
       entry_schema:
-        type: tosca.datatypes.network.PortSpec
+        type: tosca.datatypes.indigo.network.PortSpec
 
   node_templates:
     ml_install:
@@ -180,6 +186,7 @@ topology_template:
             num_cpus: { get_input: num_cpus }
             mem_size: { get_input: mem_size }
             num_gpus: { get_input: num_gpus }
+            gpu_model: { get_input: gpu_model }
             disk_size: { get_input: disk_size }
         os:
           properties:
