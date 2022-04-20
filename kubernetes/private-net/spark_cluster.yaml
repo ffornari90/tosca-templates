@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/custom_types.yaml 
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/-/raw/master/tosca_types/applications/spark_types.yaml
 
 description: Deploy a complete Spark 3.0.1 + Jupyter Notebook on top of a Kubernetes (K8s) computing cluster
 
@@ -191,3 +191,5 @@ topology_template:
       value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, private_address, 0 ], '.myip.cloud.infn.it' ] }
     os_users:
       value: { get_property: [ k8s_master_server, os_users, 0 ] }  
+    vpn_client_conf_url:
+      value: { concat: [ "https://baltig.infn.it/infn-cloud/vpnconfiles/-/raw/main/vpn-",  get_property: [ priv_network, proxy_host ], "-client.ovpn?inline=false" ] }      
