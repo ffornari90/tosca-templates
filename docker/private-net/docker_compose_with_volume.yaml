@@ -28,7 +28,7 @@ topology_template:
       description: Size of the volume to be mounted in /var/lib/docker
       default: 20 GB
       constraints:
-        in_range: [1 GB, 50 GB]
+        in_range: [1 GB, 100 GB]
 
     docker_compose_file_url:
       type: string

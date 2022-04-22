@@ -7,7 +7,7 @@ description: >
   Deploy a virtual machine pre-configured with the Elasticsearch search and analytics engine and with Kibana for simple visualization of data with charts and graphs in Elasticsearch
 
 metadata:
-  display_name: Elasticsearch and Kibana (version 8.0.0)
+  display_name: Elasticsearch and Kibana (version 8.1.3)
 
 
 topology_template:
@@ -84,7 +84,7 @@ topology_template:
       properties:
         project_name: elastic
         environment_variables:
-          - ELASTIC_VERSION: "8.0.0"
+          - ELASTIC_VERSION: "8.1.3"
           - ELASTIC_PASSWORD: { get_input: elastic_password }
           - KIBANA_PASSWORD: { get_input: kibana_password }
           - CERT_EMAIL: { get_input: contact_email }

@@ -85,7 +85,6 @@ topology_template:
           "jupyter": { "protocol": "tcp", "source": 8888 },
           "jupyter-collaborative": { "protocol": "tcp", "source": 8889 },
           "grafana": { "protocol": "tcp", "source": 3000 },
-          "ssh": { "protocol": "tcp", "source": 22 }
         }
       constraints:
         - min_length: 0

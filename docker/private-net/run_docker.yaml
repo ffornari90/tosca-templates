@@ -14,35 +14,51 @@ topology_template:
 
     num_cpus:
       type: integer
-      default: 2
+      description: Number of virtual cpus for the VM
+      default: 1
 
     mem_size:
-      type: string
-      default: "1 GB"
+      type: scalar-unit.size
+      description: Amount of memory for the VM
+      default: 2 GB
       
     docker_appname:
       type: string
+      description: Name to be assigned to the container
       default: "nginx"
 
     docker_image:
       type: string
+      description: Name of the image used to create the container
       default: "nginx"
 
     docker_tag:
       type: string 
+      description: Tag of the image used to create the container
       default: "latest"
 
-    docker_ports:
-      type: string
-      default: "8080:80"
+    ports_mapping:
+      type: list
+      description: "List of ports to publish from the container to the host. Use docker CLI syntax: 8000, or 9000:8000, where 8000 is a container port, 9000 is a host port"
+      entry_schema:
+        type: string        
+      default: [ "8080:80" ]
 
     docker_command:
       type: string
+      description: Command to execute when the container starts
       default: ""
 
     service_ports:
-      type: integer
-      default: "8080"
+      type: map
+      required: false
+      default: { "ssh": { "protocol": "tcp", "source": 22 } }
+      constraints:
+        - min_length: 0
+      entry_schema:
+        type: tosca.datatypes.indigo.network.PortSpec
+      description: Ports to open on the VM to access the service(s)
+
  
     users:
       type: list
@@ -60,7 +76,7 @@ topology_template:
         type: map
         entry_schema:
           type: string
-      description: Environment variables
+      description: Environment variables (key,value pairs)
       
   node_templates:
 
@@ -70,7 +86,7 @@ topology_template:
         network_type: private
 
     server_priv_port:
-      type: tosca.nodes.indigo.network.Port
+      type: tosca.nodes.network.Port
       properties:
         order: 0
       requirements:
@@ -84,10 +100,7 @@ topology_template:
       capabilities:
         endpoint:
           properties:
-            ports:
-              user_port:
-                protocol: tcp
-                source: { get_input: service_ports }
+            ports: { get_input: service_ports }
         scalable:
           properties:
             count: 1
@@ -101,13 +114,13 @@ topology_template:
             version: 20.04
             type: linux
  
-    simple_docker:
+    docker:
       type: tosca.nodes.indigo.dockerRun
       properties:
         docker_appname: { get_input: docker_appname }
         docker_image: { get_input: docker_image }
         docker_tag: { get_input: docker_tag }
-        docker_ports: { get_input: docker_ports }
+        docker_ports: { get_input: ports_mapping }
         docker_command: { get_input: docker_command }
         environment_variables: { get_input: environment_variables }
       requirements:

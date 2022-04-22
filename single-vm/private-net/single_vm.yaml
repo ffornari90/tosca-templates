@@ -44,8 +44,8 @@ topology_template:
       constraints:
         - min_length: 0
       entry_schema:
-        type: tosca.datatypes.network.PortSpec
-      description: Ports to open on the VM           
+        type: tosca.datatypes.indigo.network.PortSpec
+      description: Ports to open on the host
 
     users:
       type: list
