@@ -49,7 +49,7 @@ topology_template:
 
     jupyter_images:
       type: string
-      default: "dodasts/cygno-lab:v1.0.0-snj"
+      default: "dodasts/cygno-lab:v1.0.12-cygno"
       description: Default image for jupyter server
 
     ports:
@@ -93,6 +93,7 @@ topology_template:
         iam_url: { get_input: iam_url }
         iam_groups: { get_input: iam_groups }
         iam_admin_groups: { get_input: iam_admin_groups }
+        jupyter_hub_image: "dodasts/cygno-hub:v1.0.13-cygno"
         jupyter_images: { get_input: jupyter_images }
         jupyter_post_start_cmd: "/usr/local/share/dodasts/script/post_script.sh"
         jupyter_host_mount_dir: { get_input: mountpoint_data } 
