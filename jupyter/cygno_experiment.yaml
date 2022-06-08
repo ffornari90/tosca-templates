@@ -37,6 +37,11 @@ topology_template:
       default: "https://iam.cloud.infn.it"
       description: IAM Instance for end user authentication
 
+    iam_subject:
+      type: string
+      default: ""
+      description: IAM owner subject
+
     iam_groups:
       type: string
       default: "cygno-users"
@@ -46,6 +51,11 @@ topology_template:
       type: string
       default: "cygno"
       description: IAM groups for JupyterHub ADMIN authorization management
+
+    enable_monitoring:
+      type: boolean
+      default: false
+      description: Enable/disable monitoring
 
     jupyter_images:
       type: string
@@ -91,8 +101,10 @@ topology_template:
       type: tosca.nodes.DODAS.single-node-jupyterhub
       properties:
         iam_url: { get_input: iam_url }
+        iam_subject: { get_input: iam_subject }
         iam_groups: { get_input: iam_groups }
         iam_admin_groups: { get_input: iam_admin_groups }
+        monitoring: { get_input: enable_monitoring }
         jupyter_hub_image: "dodasts/cygno-hub:v1.0.13-cygno"
         jupyter_images: { get_input: jupyter_images }
         jupyter_post_start_cmd: "/usr/local/share/dodasts/script/post_script.sh"
