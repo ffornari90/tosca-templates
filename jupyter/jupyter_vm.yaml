@@ -73,7 +73,7 @@ topology_template:
 
     jupyter_images:
       type: string
-      default: "dodasts/snj-base-lab-persistence:v1.0.2-snj"
+      default: "dodasts/snj-base-lab-persistence:v1.0.3-snj"
       description: Default image
 
     jupyterlab_collaborative:
