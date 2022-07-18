@@ -112,7 +112,7 @@ topology_template:
 
     jupyterlab_collaborative_image:
       type: string
-      default: "dodasts/ml-infn-jlabc:v1.0.0-snj"
+      default: "dodasts/ml-infn-jlabc:v1.0.5-ml-infn"
       description: Default image for jupyter collaborative service
 
     cvmfs_repos:
