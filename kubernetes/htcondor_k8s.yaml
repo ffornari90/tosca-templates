@@ -43,7 +43,7 @@ topology_template:
     number_of_slaves:
       description: number of K8s node VMs
       type: integer
-      default: 1
+      default: 3
 
     num_cpus_slave:
       description: number of CPUs for K8s node VM
