@@ -23,6 +23,13 @@ topology_template:
       description: Amount of memory for the VM
       default: 4 GB
 
+    docker_storage_size:
+      type: scalar-unit.size
+      description: Size of the volume to be mounted in /var/lib/docker
+      default: 20 GB
+      constraints:
+        in_range: [1 GB, 100 GB]
+
     contact_email:
       type: string
       required: yes
@@ -91,12 +98,12 @@ topology_template:
     iam_url:
       type: string
       default: https://iam.cloud.infn.it
-      description: IAM url      
- 
+      description: IAM url
+
     iam_authorized_group:
       type: string
       required: yes
-      description: IAM group authorized to access the service     
+      description: IAM group authorized to access the service
 
     users:
       type: list
@@ -180,12 +187,19 @@ topology_template:
             distribution: ubuntu
             type: linux
             version: 20.04
+      requirements:
+        - local_storage:
+            node: block_device
+            capability: tosca.capabilities.Attachment
+            relationship:
+              type: tosca.relationships.AttachesTo
+              properties:
+                location: '/var/lib/docker'
 
-  policies:
-    - deploy_on_specific_site:
-        type: tosca.policies.indigo.SlaPlacement
-        properties:
-          sla_id: 5e1daa90d000a819fe11ca56
+    block_device:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: docker_storage_size }
 
   outputs:
     storage_service_endpoint:
