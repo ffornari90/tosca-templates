@@ -3,9 +3,10 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/-/raw/CLOUD-1394/tosca_types/infrastructure/kubernetes_types.yaml
 
-description: Deploy a single master Kubernetes 1.23.8 cluster
+description: Deploy a single master Kubernetes 1.24.7 cluster
 
 topology_template:
+
 
   inputs:
 
@@ -65,6 +66,7 @@ topology_template:
       default: []
       required: false  
 
+
   node_templates:
 
     pub_network:
@@ -101,11 +103,10 @@ topology_template:
         - binding: k8s_node_server
         - link: priv_network
 
-
     k8s_master:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
       properties:
-        kube_version: 1.23.8
+        kube_version: 1.24.7
         admin_token: { get_input: admin_token }
       requirements:
         - host: k8s_master_server
@@ -113,7 +114,7 @@ topology_template:
     k8s_node:
       type: tosca.nodes.DODAS.WorkerNode.Kubernetes
       properties:
-        kube_version: 1.23.8
+        kube_version: 1.24.7
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
         - host: k8s_node_server
