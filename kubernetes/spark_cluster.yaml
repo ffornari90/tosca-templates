@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/-/raw/master/tosca_types/applications/spark_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/-/raw/CLOUD-1394/tosca_types/applications/spark_types.yaml
 
 description: Deploy a complete Spark 3.0.1 + Jupyter Notebook on top of a Kubernetes (K8s) computing cluster
 
@@ -49,6 +49,27 @@ topology_template:
       description: memory size for K8s node VM
       type: string
       default: "8 GB"
+
+    iam_url:
+      type: string
+      default: "https://iam.cloud.infn.it"
+      description: IAM Instance for end user authentication
+
+    iam_subject:
+      type: string
+      default: ""
+      description: IAM owner subject
+
+    iam_groups:
+      type: string
+      default: ""
+      description: IAM groups for authorization management
+
+    iam_admin_groups:
+      type: string
+      default: ""
+      description: IAM groups for JupyterHub ADMIN authorization management
+      
     
     s3_bucket:
       type: string
@@ -111,6 +132,10 @@ topology_template:
         repos:
         - { name: dodas, url: "https://dodas-ts.github.io/helm_charts" }
         externalIp: { get_attribute: [ k8s_master_server , public_address, 0 ]  }
+        iam_url: { get_input: iam_url }
+        iam_subject: { get_input: iam_subject }
+        iam_groups: { get_input: iam_groups }
+        iam_admin_groups: { get_input: iam_admin_groups }
         s3_bucket: { get_input: s3_bucket }
         s3_endpoint : { get_input: s3_endpoint }
         helm_version: v3
@@ -120,6 +145,11 @@ topology_template:
           s3:
             bucket: {{ s3_bucket }}
             endpoint: {{ s3_endpoint }}
+          iam:
+            endpoint: {{ iam_endpoint }}
+            oauth_sub: {{ iam_subject }}
+            oauth_groups: {{ iam_groups }}
+            oauth_admin_groups: {{ iam_admin_groups }}                  
       requirements:
         - host: k8s_master_server
         - dependency: k8s_master
@@ -127,7 +157,7 @@ topology_template:
     k8s_master:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
       properties:
-        kube_version: 1.19.6
+        kube_version: 1.23.8
         admin_token: { get_input: admin_token }
       requirements:
         - host: k8s_master_server
@@ -135,7 +165,7 @@ topology_template:
     k8s_slave:
       type: tosca.nodes.DODAS.WorkerNode.Kubernetes
       properties:
-        kube_version: 1.19.6
+        kube_version: 1.23.8
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
         - host: k8s_slave_server
