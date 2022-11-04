@@ -179,4 +179,4 @@ topology_template:
   - deploy_on_specific_site:
       type: tosca.policies.indigo.SlaPlacement
       properties:
-        sla_id: ee1114a1-7ab6-46d2-8146-c5095f8f442d
+        sla_id: b9233b5d-2882-4c54-a35d-3ded5309c3ed
