@@ -25,7 +25,7 @@ topology_template:
     num_cpus_master:
       description: number of CPU for K8s master VM
       type: integer
-      default: 2
+      default: 1
 
     mem_size_master:
       description: memory size for K8s master VM
@@ -40,7 +40,7 @@ topology_template:
     num_cpus_node:
       description: number of CPUs for K8s node VM
       type: integer
-      default: 2
+      default: 1
 
     mem_size_node:
       description: memory size for K8s node VM
