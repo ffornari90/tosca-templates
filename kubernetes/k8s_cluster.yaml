@@ -174,9 +174,3 @@ topology_template:
     os_users:
       value: { get_property: [ k8s_master_server, os_users, 0 ] }
 
-
-  policies:
-  - deploy_on_specific_site:
-      type: tosca.policies.indigo.SlaPlacement
-      properties:
-        sla_id: ee1114a1-7ab6-46d2-8146-c5095f8f442d
