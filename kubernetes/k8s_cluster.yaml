@@ -173,4 +173,3 @@ topology_template:
       value: { get_attribute: [ k8s_node_server, private_address ] }
     os_users:
       value: { get_property: [ k8s_master_server, os_users, 0 ] }
-
