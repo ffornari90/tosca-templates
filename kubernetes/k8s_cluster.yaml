@@ -47,6 +47,11 @@ topology_template:
       type: string
       default: "4 GB"
 
+    domain:
+      description: cloud domain
+      type: string
+      default: ".myip.cloud.infn.it"
+
     ports:
       description:
       type: map
@@ -134,7 +139,6 @@ topology_template:
             count: { get_input: number_of_masters }
         host:
           properties:
-            #instance_type:  m1.medium
             num_cpus: { get_input: num_cpus_master }
             mem_size: { get_input: mem_size_master }
         os:
@@ -162,9 +166,9 @@ topology_template:
 
   outputs:
     k8s_endpoint:
-      value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
+      value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, public_address, 0 ], get_input: domain ] }
     grafana_endpoint:
-      value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
+      value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, public_address, 0 ], get_input: domain ] }
     grafana_username:
       value: admin
     k8s_master_ip:
