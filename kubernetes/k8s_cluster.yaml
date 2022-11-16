@@ -168,7 +168,7 @@ topology_template:
     k8s_endpoint:
       value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, public_address, 0 ], '.', get_input: domain ] }
     grafana_endpoint:
-      value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, public_address, 0 ], get_input: domain ] }
+      value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, public_address, 0 ], '.', get_input: domain ] }
     grafana_username:
       value: admin
     k8s_master_ip:
