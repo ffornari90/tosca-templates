@@ -92,6 +92,8 @@ topology_template:
       required: false
       default:
         {
+          "jupyter-web": { "protocol": "tcp", "source": 80 },
+          "jupyter-websecure": { "protocol": "tcp", "source": 443 },
           "jupyter": { "protocol": "tcp", "source": 8888 },
           "jupyter-collaborative": { "protocol": "tcp", "source": 8889 },
           "grafana": { "protocol": "tcp", "source": 3000 },
