@@ -86,6 +86,11 @@ topology_template:
       default: "dodasts/snj-base-jlabc:v1.0.5-snj"
       description: Default image for jupyter collaborative service
 
+    role_name:
+      type: string
+      default: "ansible-role-jupyterhub"
+      description: Ansible role name for jupyterhub deployment
+
     environment_variables:
       required: no
       default: []
