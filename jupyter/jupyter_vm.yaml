@@ -158,6 +158,13 @@ topology_template:
         - binding: vm_server
         - link: priv_network
 
+    docker_compose_service:
+      type: tosca.nodes.indigo.DockerCompose
+      properties:
+        environment_variables: { get_input: environment_variables }
+      requirements:
+        - host: vm_server
+
     vm_server:
       type: tosca.nodes.indigo.Compute
       properties:
