@@ -167,6 +167,7 @@ topology_template:
       type: tosca.nodes.indigo.DockerCompose
       properties:
         environment_variables: { get_input: environment_variables }
+        role_name: { get_input: role_name }
       requirements:
         - host: vm_server
 
