@@ -86,11 +86,6 @@ topology_template:
       default: "dodasts/snj-base-jlabc:v1.0.5-snj"
       description: Default image for jupyter collaborative service
 
-    role_name:
-      type: string
-      default: "ansible-role-jupyterhub"
-      description: Ansible role name for jupyterhub deployment
-
     environment_variables:
       required: no
       default: []
@@ -134,6 +129,7 @@ topology_template:
         jupyterlab_collaborative_image:
           { get_input: jupyterlab_collaborative_image }
         server_ip: { get_attribute: [HOST, public_address, 0] }
+        environment_variables: { get_input: environment_variables }
       requirements:
         - host: vm_server
 
@@ -162,14 +158,6 @@ topology_template:
       requirements:
         - binding: vm_server
         - link: priv_network
-
-    docker_compose_service:
-      type: tosca.nodes.indigo.DockerCompose
-      properties:
-        environment_variables: { get_input: environment_variables }
-        role_name: { get_input: role_name }
-      requirements:
-        - host: vm_server
 
     vm_server:
       type: tosca.nodes.indigo.Compute
