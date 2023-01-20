@@ -86,6 +86,16 @@ topology_template:
       default: "dodasts/snj-base-jlabc:v1.0.5-snj"
       description: Default image for jupyter collaborative service
 
+    environment_variables:
+      required: no
+      default: []
+      type: list
+      entry_schema:
+        type: map
+        entry_schema:
+          type: string
+      description: Environment variables
+
     ports:
       description: Ports to open on the VM
       type: map
