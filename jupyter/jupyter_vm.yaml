@@ -125,7 +125,6 @@ topology_template:
         jupyterlab_collaborative_image:
           { get_input: jupyterlab_collaborative_image }
         server_ip: { get_attribute: [HOST, public_address, 0] }
-        environment_variables: { get_input: environment_variables }
       requirements:
         - host: vm_server
 
