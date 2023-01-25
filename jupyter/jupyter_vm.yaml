@@ -86,15 +86,10 @@ topology_template:
       default: "dodasts/snj-base-jlabc:v1.0.5-snj"
       description: Default image for jupyter collaborative service
 
-    environment_variables:
-      required: no
-      default: []
-      type: list
-      entry_schema:
-        type: map
-        entry_schema:
-          type: string
-      description: Environment variables
+    contact_email:
+      type: string
+      default: ""
+      description: Email address of certificate management administrator
 
     ports:
       description: Ports to open on the VM
@@ -117,6 +112,7 @@ topology_template:
     ml_install:
       type: tosca.nodes.DODAS.single-node-jupyterhub
       properties:
+        contact_email: { get_input: contact_email }
         iam_url: { get_input: iam_url }
         iam_subject: { get_input: iam_subject }
         iam_groups: { get_input: iam_groups }
