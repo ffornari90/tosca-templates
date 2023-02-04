@@ -130,7 +130,7 @@ topology_template:
         jupyterlab_collaborative_image:
           { get_input: jupyterlab_collaborative_image }
         server_ip: { get_attribute: [HOST, public_address, 0] }
-        dns_name: { get_attribute: [HOST, public_address, 0] + [SELF, network_domain] }
+        dns_name: { get_attribute: [HOST, public_address, 0] }{ get_property: [SELF, network_domain] }
       requirements:
         - host: vm_server
 
