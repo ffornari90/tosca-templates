@@ -197,7 +197,7 @@ topology_template:
             [
               "https://",
               get_attribute: [vm_server, public_address, 0],
-              get_input: network_domain,
+              ".", get_input: network_domain,
               ":8888",
             ],
         }
@@ -208,7 +208,7 @@ topology_template:
             [
               "https://",
               get_attribute: [vm_server, public_address, 0],
-              get_input: network_domain,
+              ".", get_input: network_domain,
               ":3000",
             ],
         }
