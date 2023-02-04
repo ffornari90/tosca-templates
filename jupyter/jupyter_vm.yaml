@@ -130,6 +130,7 @@ topology_template:
         jupyterlab_collaborative_image:
           { get_input: jupyterlab_collaborative_image }
         server_ip: { get_attribute: [HOST, public_address, 0] }
+        dns_name: { get_attribute: [HOST, public_address, 0] } + { get_property: [SELF, network_domain] }
       requirements:
         - host: vm_server
 
@@ -190,8 +191,8 @@ topology_template:
           concat:
             [
               "https://",
-              get_attribute: [vm_server, public_address, 0],
-              ".myip.cloud.infn.it:8888",
+              get_property: [SELF, dns_name],
+              ":8888",
             ],
         }
     grafana_endpoint:
@@ -200,8 +201,8 @@ topology_template:
           concat:
             [
               "https://",
-              get_attribute: [vm_server, public_address, 0],
-              ".myip.cloud.infn.it:3000",
+              get_property: [SELF, dns_name],
+              ":3000",
             ],
         }
     os_users:
