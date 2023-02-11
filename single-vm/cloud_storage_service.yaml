@@ -13,6 +13,11 @@ topology_template:
 
   inputs:
 
+    test_flag:
+      type: boolean
+      description: If set to true the certificate will be issued using the staging server of Letsencrypt
+      default: true      
+
     num_cpus:
       type: integer
       description: Number of virtual cpus for the VM
@@ -35,15 +40,22 @@ topology_template:
       required: yes
       description: Insert your Email for receiving notifications
 
-    owncloud_admin_username:
+
+    data_service_implementation:
+      type: string
+      default: owncloud
+      constraints:
+        - valid_values: [ 'owncloud', 'nextcloud' ]      
+
+    admin_username:
       type: string
       default: "admin"
-      description: Username for ownCloud admin access
+      description: Username for admin access
 
-    owncloud_admin_password:
+    admin_password:
       type: string
       required: yes
-      description: Password for ownCloud admin user
+      description: Password for admin user
 
     mysql_root_password:
       type: string
@@ -65,10 +77,10 @@ topology_template:
       required: yes
       description: Password for backup
 
-    owncloud_bucket_name:
+    data_bucket_name:
       type: string
       required: yes
-      description: Name of the bucket used by ownCloud
+      description: Name of the bucket used to store data
 
     backup_bucket_name:
       type: string
@@ -105,6 +117,11 @@ topology_template:
       required: yes
       description: IAM group authorized to access the service
 
+    iam_admin_group:
+      type: string
+      default: ''
+      description: IAM group authorized to access the service as admins  
+
     users:
       type: list
       description: list of users to create on the VM
@@ -115,10 +132,10 @@ topology_template:
 
   node_templates:
 
-    s3_owncloud_bucket:
+    s3_data_bucket:
       type: tosca.nodes.indigo.S3Bucket
       properties:
-        bucket_name: { get_input: owncloud_bucket_name }
+        bucket_name: { get_input: data_bucket_name }
         aws_access_key: { get_input: aws_access_key }
         aws_secret_key: { get_input: aws_secret_key }
         s3_url: 'https://s3.cloud.infn.it'
@@ -138,27 +155,30 @@ topology_template:
     docker_compose_service:
       type: tosca.nodes.indigo.CloudStorageService
       properties:
-        owncloud_hostname: { concat: [ "data.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
-        nagios_hostname: { concat: [ "status.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
-        s3_data_bucket: { get_property: [ s3_owncloud_bucket, bucket_name ] }
+        test_flag: { get_input: test_flag }      
+        data_service_implementation: { get_input: data_service_implementation }       
+        data_service_hostname: { concat: [ "data.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
+        mon_service_hostname: { concat: [ "status.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
+        s3_data_bucket: { get_property: [ s3_data_bucket, bucket_name ] }
         s3_backup_bucket: { get_property: [ s3_backup_bucket, bucket_name ] }
-        s3_access_key: { get_property: [ s3_owncloud_bucket, aws_access_key ] }
-        s3_secret_key: { get_property: [ s3_owncloud_bucket, aws_secret_key ] }
-        s3_endpoint: { get_property: [ s3_owncloud_bucket, s3_url ] }
-        owncloud_admin_user: { get_input: owncloud_admin_username }
-        owncloud_admin_passw: { get_input: owncloud_admin_password }
+        s3_access_key: { get_property: [ s3_data_bucket, aws_access_key ] }
+        s3_secret_key: { get_property: [ s3_data_bucket, aws_secret_key ] }
+        s3_endpoint: { get_property: [ s3_data_bucket, s3_url ] }
+        admin_user: { get_input: admin_username }
+        admin_passw: { get_input: admin_password }
         mysql_root_passw: { get_input: mysql_root_password }
-        nagios_admin_user: { get_input: monitoring_admin_username  }
-        nagios_admin_passw: { get_input: monitoring_admin_password }
+        mon_admin_user: { get_input: monitoring_admin_username  }
+        mon_admin_passw: { get_input: monitoring_admin_password }
         backup_passphrase: { get_input: backup_passphrase  }
         contact_email: { get_input: contact_email }
         smtp_username: { get_input: smtp_username }
         smtp_password: { get_input: smtp_password }
         iam_url: { get_input: iam_url }
         iam_group: { get_input: iam_authorized_group }
+        iam_admin_group: { get_input: iam_admin_group }
       requirements:
         - host: server
-        - dependency: s3_owncloud_bucket
+        - dependency: s3_data_bucket
         - dependency: s3_backup_bucket
 
     server:
