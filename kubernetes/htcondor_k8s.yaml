@@ -122,7 +122,7 @@ topology_template:
           - { name: longhorn, url: "https://charts.longhorn.io" }
         name: longhorn
         chart: "longhorn/longhorn"
-        inline_options: "--version 1.2.2 -n longhorn-system --create-namespace"
+        inline_options: "--version 1.3.2 -n longhorn-system --create-namespace"
         helm_version: v3
         values_file: |
           persistence:
@@ -307,7 +307,7 @@ topology_template:
     k8s_master:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
       properties:
-        kube_version: 1.23.8
+        kube_version: 1.24.9
         admin_token: { get_input: admin_token }
       requirements:
         - host: k8s_master_server
@@ -315,7 +315,7 @@ topology_template:
     k8s_slave:
       type: tosca.nodes.DODAS.WorkerNode.Kubernetes
       properties:
-        kube_version: 1.23.8
+        kube_version: 1.24.9
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
         - host: k8s_slave_server
