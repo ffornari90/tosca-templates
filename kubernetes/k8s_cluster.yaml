@@ -47,10 +47,8 @@ topology_template:
       default: "8 GB"
 
     disk_size_node:
-      type: scalar-unit.size
       description: Size of the local disk on K8s node VMs
-      default: 50 GB
-      required: yes
+      type: scalar-unit.size
 
     number_of_nodes_with_gpu:
       description: Number of K8s nodes with GPU support
@@ -68,10 +66,8 @@ topology_template:
       default: "8 GB"
 
     disk_size_node_with_gpu:
-      type: scalar-unit.size
       description: Size of the local disk on K8s node VMs
-      default: 50 GB
-      required: yes
+      type: scalar-unit.size
 
     num_gpus_node:
       description: Number of GPUs for K8s nodes with GPU support
@@ -216,7 +212,7 @@ topology_template:
           properties:
             num_cpus: { get_input: num_cpus_node }
             mem_size: { get_input: mem_size_node }
-            disk_size: { get_input: disk_size_node }
+            # disk_size: { get_input: disk_size_node }
             num_gpus: 0
         os:
           properties:
