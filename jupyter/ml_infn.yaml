@@ -1,7 +1,11 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
+<<<<<<< HEAD
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v1.0.0/tosca_types/applications/jupyter_types.yaml
+=======
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/-/raw/master/tosca_types/applications/jupyter_types.yaml
+>>>>>>> b8ae92c (chore: update tosca-types url to master repo)
 
 description: Run a single VM with exposing both ssh access and multiuser JupyterHub interface, integrating the ML-INFN envirnoment
 
