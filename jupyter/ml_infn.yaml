@@ -153,6 +153,7 @@ topology_template:
           { get_input: jupyterlab_collaborative_image }
         cvmfs_repos: { get_input: cvmfs_repos }
         server_ip: { get_attribute: [HOST, public_address, 0] }
+        gpu_model: { get_input: gpu_model }
       requirements:
         - host: vm_server
 
