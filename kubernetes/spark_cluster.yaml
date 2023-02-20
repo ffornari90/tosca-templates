@@ -11,6 +11,7 @@ metadata:
 
 topology_template:
 
+
   inputs:
 
     admin_token:
@@ -74,12 +75,11 @@ topology_template:
       type: string
       default: ""
       description: IAM groups for JupyterHub ADMIN authorization management
-      
-    
+
     s3_bucket:
       type: string
       description: S3 bucket
-    
+
     s3_endpoint:
       type: string
       description: "S3 endpoint (http://endpoint:9000)"
@@ -92,6 +92,7 @@ topology_template:
         type: tosca.datatypes.indigo.User
       default: []
       required: false
+
 
   node_templates:
 

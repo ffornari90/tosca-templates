@@ -299,7 +299,6 @@ topology_template:
             iamScimClientId:
             iamScimSecret:
             iamMapGroup: ALL
-
       requirements:
         - host: k8s_master_server
         - dependency: longhorn
