@@ -91,11 +91,6 @@ topology_template:
       default: ""
       description: Email address of certificate management administrator
 
-    network_domain:
-      type: string
-      default: "myip.cloud.infn.it"
-      description: Network domain for the VM deployment
-
     letsencrypt_test:
       type: boolean
       default: true
