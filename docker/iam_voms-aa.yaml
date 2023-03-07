@@ -30,6 +30,7 @@ topology_template:
 
     contact_email:
       type: string
+      default: user@local.io
       description: Email address of certificate management administrator
 
     active_profiles:
@@ -324,18 +325,13 @@ topology_template:
 
     google_client_id:
       type: string
-      default: ""
+      default: client_id
       description: The Google OAuth client id
 
     google_client_secret:
       type: string
-      default: ""
+      default: client_secret
       description: The OAuth client secret
-
-    saml_entity_id:
-      type: string
-      default: ""
-      description: The SAML entity ID for this IAM instance
 
     saml_login_button_text:
       type: string
@@ -409,12 +405,12 @@ topology_template:
 
     mail_username:
       type: string
-      default: ""
+      default: user
       description: Username for IAM authentication to mail server
 
     mail_password:
       type: string
-      default: ""
+      default: password
       description: Password for IAM authentication to mail server
 
     mail_smtp_auth:
@@ -593,7 +589,7 @@ topology_template:
         local_authn_enabled_for:  { get_input: local_authn_enabled_for }
         google_client_id:  { get_input: google_client_id }
         google_client_secret:  { get_input: google_client_secret }
-        saml_entity_id:  { get_input: saml_entity_id }
+        saml_entity_id:  { concat: ["https://", get_attribute: [HOST, public_address, 0], ".", get_property: [ SELF, network_domain ]] }
         saml_login_button_text:  { get_input: saml_login_button_text }
         saml_keystore_password:  { get_input: saml_keystore_password }
         saml_key_password:  { get_input: saml_key_password }
@@ -624,7 +620,7 @@ topology_template:
         docker_compose_file_url: https://baltig.infn.it/fornari/iam-voms-aa/-/raw/traefik/compose/docker-compose.yml
         environment_variables: { get_input: environment_variables }
         server_ip: { get_attribute: [HOST, public_address, 0] }
-        dns_name: { concat: [get_attribute: [HOST, public_address, 0], ".", get_input: network_domain] }
+        dns_name: { concat: [get_attribute: [HOST, public_address, 0], ".", get_property: [ SELF, network_domain ]] }
       requirements:
         - host: server
 
@@ -658,7 +654,7 @@ topology_template:
             [
               "https://",
               get_attribute: [server, public_address, 0],
-              ".", get_input: network_domain,
+              ".myip.cloud.infn.it",
             ],
         }
     os_users:
