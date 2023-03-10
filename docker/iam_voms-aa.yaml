@@ -5,7 +5,7 @@ imports:
 
 description: >
   Deploy a virtual machine with docker engine and docker-compose pre-installed.
-  Run a docker compose file deploying IAM with VOMS-AA fetched from the specified URL.
+  Run a docker compose file deploying Indigo-IAM.
 
 metadata:
   display_name: Docker-compose
@@ -26,7 +26,7 @@ topology_template:
     letsencrypt_test:
       type: boolean
       default: true
-      description: Flag to enable certificate request against Let's Encrypt staging endpoint
+      description: If set to 'true' enables certificate request against Let's Encrypt staging endpoint (for test purposes), otherwise against Let's Encrypt production endpoint
 
     contact_email:
       type: string
@@ -36,7 +36,7 @@ topology_template:
     active_profiles:
       type: string
       default: prod,registration
-      description: List of comma-separated active profiles for IAM service
+      description: List of comma-separated active profiles for IAM service. 'prod' and 'registration' profiles are highly recommended
 
     iam_version:
       type: string
@@ -56,7 +56,7 @@ topology_template:
     forward_headers_strategy:
       type: string
       default: native
-      description: Use forwarded headers from reverse proxy. Set this to native when deploying the service behind a reverse proxy
+      description: Use forwarded headers from reverse proxy. Set this to 'native' when deploying the service behind a reverse proxy or with SAML authentication
 
     tomcat_access_log_enabled:
       type: boolean
@@ -71,22 +71,12 @@ topology_template:
     actuator_user_username:
       type: string
       default: user
-      description: Sets the username of the user allowed to have privileged access to actuator endpoints
+      description: Sets the username of the user allowed to have privileged access to actuator endpoints (for monitoring purposes)
 
     actuator_user_password:
       type: string
       default: secret
-      description: Sets the password of the user allowed to have privileged access to actuator endpoints
-
-    local_resources_enable:
-      type: boolean
-      default: false
-      description: Enables the serving of resources from the local file system
-
-    local_resources_location:
-      type: string
-      default: file:/indigo-iam/local-resources
-      description: Sets the directory that contains the local resources that should be exposed
+      description: Sets the password of the user allowed to have privileged access to actuator endpoints (for monitoring purposes)
 
     organisation_name:
       type: string
@@ -133,21 +123,6 @@ topology_template:
       default: true
       description: Includes the scope in issued access tokens
 
-    db_host:
-      type: string
-      default: db
-      description: The host where the MariaDB/MySQL daemon is running
-
-    db_port:
-      type: string
-      default: 3306
-      description: The database port
-
-    db_name:
-      type: string
-      default: iam
-      description: The database name
-
     db_username:
       type: string
       default: iam
@@ -157,81 +132,6 @@ topology_template:
       type: string
       default: pwd
       description: The database password
-
-    db_max_active:
-      type: string
-      default: 50
-      description: Maximum number of active connections to the database
-
-    db_max_idle:
-      type: string
-      default: 5
-      description: Maximum number of idle connections in the pool
-
-    db_initial_size:
-      type: string
-      default: 8
-      description: Initial size of the database connection pool
-
-    db_test_while_idle:
-      type: boolean
-      default: true
-      description: Should idle connections in the pool be tested?
-
-    db_test_on_borrow:
-      type: boolean
-      default: true
-      description: Should connections in the pool be tested when borrowed?
-
-    db_validation_query:
-      type: string
-      default: SELECT 1
-      description: Which SQL query should be used to test connections?
-
-    db_time_between_eviction_runs_millis:
-      type: string
-      default: 5000
-      description: Time between database connection pool eviction runs (in msec)
-
-    db_min_evictable_idle_time_millis:
-      type: string
-      default: 60000
-      description: The minimum amount of time a connection may be idle in the pool before it is considered for eviction (in msec)
-
-    client_id:
-      type: string
-      default: client
-      description: Public identifier for client application
-
-    client_secret:
-      type: string
-      default: secret
-      description: Client application's own password
-
-    client_scopes:
-      type: string
-      default: openid profile email
-      description: Default scopes allowed to the client application (optional)
-
-    client_forward_headers_strategy:
-      type: string
-      default: none
-      description: Use forwarded headers from reverse proxy. Set this to native when deploying the service behind a reverse proxy
-
-    spring_redis_host:
-      type: string
-      default: redis
-      description: Redis server hostname
-
-    spring_redis_port:
-      type: string
-      default: 6397
-      description: Redis server port
-
-    spring_redis_password:
-      type: string
-      default: ""
-      description: Redis server password
 
     session_timeout_secs:
       type: string
@@ -248,10 +148,15 @@ topology_template:
       default: false
       description: If set to 'true' the status of the Redis service will appear in the IAM Health check endpoint
 
-    registration_show_registration_button_in_login_page:
+    registration_require_external_authentication:
       type: boolean
-      default: true
-      description: If set to 'true' the registration button will be shown on login page
+      default: false
+      description: If set to 'true' authentication against external identity provider becomes mandatory in order to apply for membership
+
+    registration_authentication_type:
+      type: string
+      default: oidc
+      description: Authentication type in order to apply for membership. Allowed values are 'oidc' and 'saml'
 
     registration_oidc_issuer:
       type: string
@@ -262,16 +167,6 @@ topology_template:
       type: string
       default: urn:example
       description: Entity ID of SAML provider to be contacted for authentication in order to apply for membership
-
-    registration_require_external_authentication:
-      type: boolean
-      default: false
-      description: If set to 'true' authentication against external identity provider becomes mandatory in order to apply for membership
-
-    registration_authentication_type:
-      type: string
-      default: oidc
-      description: Authentication type in order to apply for membership. Allowed values are 'oidc' and 'saml'
 
     registration_username_attribute:
       type: string
@@ -338,16 +233,6 @@ topology_template:
       default: Sign in with INFN AAI
       description: Text shown in the SAML login button on the IAM login page
 
-    saml_keystore_password:
-      type: string
-      default: changeit
-      description: The SAML keystore password
-
-    saml_key_password:
-      type: string
-      default: changeit
-      description: The password of the SAML key that will be used to sign requests/assertions
-
     saml_idp_metadata:
       type: string
       default: https://idp.infn.it/saml2/idp/metadata.php
@@ -406,12 +291,12 @@ topology_template:
     mail_username:
       type: string
       default: user
-      description: Username for IAM authentication to mail server
+      description: Username for IAM account on the mail server. The account must be already configured
 
     mail_password:
       type: string
       default: password
-      description: Password for IAM authentication to mail server
+      description: Password for IAM account on the mail server. The account must be already configured
 
     mail_smtp_auth:
       type: boolean
@@ -538,8 +423,6 @@ topology_template:
         tomcat_access_log_directory:  { get_input: tomcat_access_log_directory }
         actuator_user_username:  { get_input: actuator_user_username }
         actuator_user_password:  { get_input: actuator_user_password }
-        local_resources_enable:  { get_input: local_resources_enable }
-        local_resources_location:  { get_input: local_resources_location }
         organisation_name:  { get_input: organisation_name }
         logo_url:  { get_input: logo_url }
         logo_dimension:  { get_input: logo_dimension }
@@ -549,30 +432,11 @@ topology_template:
         access_token_include_authn_info:  { get_input: access_token_include_authn_info }
         access_token_include_nbf:  { get_input: access_token_include_nbf }
         access_token_include_scope:  { get_input: access_token_include_scope }
-        db_host:  { get_input: db_host }
-        db_port:  { get_input: db_port }
-        db_name:  { get_input: db_name }
         db_username:  { get_input: db_username }
         db_password:  { get_input: db_password }
-        db_max_active:  { get_input: db_max_active }
-        db_max_idle:  { get_input: db_max_idle }
-        db_initial_size:  { get_input: db_initial_size }
-        db_test_while_idle:  { get_input: db_test_while_idle }
-        db_test_on_borrow:  { get_input: db_test_on_borrow }
-        db_validation_query:  { get_input: db_validation_query }
-        db_time_between_eviction_runs_millis:  { get_input: db_time_between_eviction_runs_millis }
-        db_min_evictable_idle_time_millis:  { get_input: db_min_evictable_idle_time_millis }
-        client_id:  { get_input: client_id }
-        client_secret:  { get_input: client_secret }
-        client_scopes:  { get_input: client_scopes }
-        client_forward_headers_strategy:  { get_input: client_forward_headers_strategy }
-        spring_redis_host:  { get_input: spring_redis_host }
-        spring_redis_port:  { get_input: spring_redis_port }
-        spring_redis_password:  { get_input: spring_redis_password }
         session_timeout_secs:  { get_input: session_timeout_secs }
         spring_session_store_type:  { get_input: spring_session_store_type }
         health_redis_probe_enabled:  { get_input: health_redis_probe_enabled }
-        registration_show_registration_button_in_login_page:  { get_input: registration_show_registration_button_in_login_page }
         registration_oidc_issuer:  { get_input: registration_oidc_issuer }
         registration_saml_entity_id:  { get_input: registration_saml_entity_id }
         registration_require_external_authentication:  { get_input: registration_require_external_authentication }
@@ -589,10 +453,7 @@ topology_template:
         local_authn_enabled_for:  { get_input: local_authn_enabled_for }
         google_client_id:  { get_input: google_client_id }
         google_client_secret:  { get_input: google_client_secret }
-        saml_entity_id:  { concat: ["https://", get_attribute: [HOST, public_address, 0], ".", get_property: [ SELF, network_domain ]] }
         saml_login_button_text:  { get_input: saml_login_button_text }
-        saml_keystore_password:  { get_input: saml_keystore_password }
-        saml_key_password:  { get_input: saml_key_password }
         saml_idp_metadata:  { get_input: saml_idp_metadata }
         saml_idp_cert_url:  { get_input: saml_idp_cert_url }
         saml_metadata_lookup_service_refresh_period_sec:  { get_input: saml_metadata_lookup_service_refresh_period_sec }
