@@ -91,6 +91,11 @@ topology_template:
       default: ""
       description: Email address of certificate management administrator
 
+    role_name:
+      type: string
+      default: "ansible-role-jupyterhub-env"
+      description: Name of the Ansible role to be used for jupyterhub environment setup
+
     network_domain:
       type: string
       default: "myip.cloud.infn.it"
@@ -122,6 +127,7 @@ topology_template:
       properties:
         letsencrypt_test: { get_input: letsencrypt_test }
         contact_email: { get_input: contact_email }
+        role_name: { get_input: role_name }
         iam_url: { get_input: iam_url }
         iam_subject: { get_input: iam_subject }
         iam_groups: { get_input: iam_groups }

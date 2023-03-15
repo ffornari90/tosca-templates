@@ -28,7 +28,7 @@ topology_template:
       type: string
       default: ""
       constraints:
-        - valid_values: [ "", "T4", "A30"]          
+        - valid_values: [ "", "T4", "A30"]
 
     mem_size:
       type: scalar-unit.size
@@ -73,7 +73,7 @@ topology_template:
     iam_subject:
       type: string
       default: ""
-      description: IAM owner subject      
+      description: IAM owner subject
 
     iam_groups:
       type: string
@@ -126,6 +126,8 @@ topology_template:
       required: false
       default:
         {
+          "traefik-web": { "protocol": "tcp", "source": 80 },
+          "traefik-websecure": { "protocol": "tcp", "source": 443 },
           "jupyter": { "protocol": "tcp", "source": 8888 },
           "jupyter-collaborative": { "protocol": "tcp", "source": 8889 },
           "grafana": { "protocol": "tcp", "source": 3000 },
@@ -215,7 +217,7 @@ topology_template:
             [
               "https://",
               get_attribute: [vm_server, public_address, 0],
-              ":8888",
+              ".myip.cloud.infn.it:8888",
             ],
         }
     grafana_endpoint:
@@ -225,7 +227,7 @@ topology_template:
             [
               "https://",
               get_attribute: [vm_server, public_address, 0],
-              ":3000",
+              ".myip.cloud.infn.it:3000",
             ],
         }
     os_users:
