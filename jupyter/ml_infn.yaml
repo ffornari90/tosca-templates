@@ -92,7 +92,7 @@ topology_template:
 
     jupyter_images:
       type: string
-      default: "dodasts/ml-infn-lab:v1.0.6-ml-infn"
+      default: "dodasts/ml-infn-lab:v1.1.1-snj-ml-infn"
       description: Default image for jupyter server
 
     jupyter_use_gpu:
@@ -112,7 +112,7 @@ topology_template:
 
     jupyterlab_collaborative_image:
       type: string
-      default: "dodasts/ml-infn-jlabc:v1.0.6-ml-infn"
+      default: "dodasts/ml-infn-jlabc:v1.1.1-snj-ml-infn"
       description: Default image for jupyter collaborative service
 
     cvmfs_repos:
