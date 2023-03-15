@@ -217,7 +217,8 @@ topology_template:
             [
               "https://",
               get_attribute: [vm_server, public_address, 0],
-              ".myip.cloud.infn.it:8888",
+              ".myip.cloud.infn.it",
+              ":8888",
             ],
         }
     grafana_endpoint:
@@ -227,7 +228,8 @@ topology_template:
             [
               "https://",
               get_attribute: [vm_server, public_address, 0],
-              ".myip.cloud.infn.it:3000",
+              ".myip.cloud.infn.it",
+              ":3000",
             ],
         }
     os_users:
