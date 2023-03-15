@@ -133,7 +133,7 @@ topology_template:
         iam_groups: { get_input: iam_groups }
         iam_admin_groups: { get_input: iam_admin_groups }
         monitoring: { get_input: enable_monitoring }
-        jupyter_hub_image: dodasts/snj-base-jhub:v1.0.2p1-snj
+        jupyter_hub_image: dodasts/snj-base-jhub:v1.1.1-snj
         jupyter_images: { get_input: jupyter_images }
         jupyterlab_collaborative: { get_input: jupyterlab_collaborative }
         jupyter_post_start_cmd: "/usr/local/share/dodasts/script/post_script.sh"
