@@ -90,9 +90,14 @@ topology_template:
       default: false
       description: Enable/disable monitoring
 
+    jupyter_hub_image:
+      type: string
+      default: "dodasts/snj-base-jhub:v1.1.1-snj"
+      description: Default image for jupyterhub
+
     jupyter_images:
       type: string
-      default: "dodasts/ml-infn-lab:v1.0.0-snj"
+      default: "dodasts/ml-infn-lab:v1.1.1-snj"
       description: Default image for jupyter server
 
     jupyter_use_gpu:
@@ -112,7 +117,7 @@ topology_template:
 
     jupyterlab_collaborative_image:
       type: string
-      default: "dodasts/ml-infn-jlabc:v1.0.5-ml-infn"
+      default: "dodasts/ml-infn-jlabc:v1.1.1-snj-ml-infn"
       description: Default image for jupyter collaborative service
 
     cvmfs_repos:
@@ -146,6 +151,7 @@ topology_template:
         iam_groups: { get_input: iam_groups }
         iam_admin_groups: { get_input: iam_admin_groups }
         monitoring: { get_input: enable_monitoring }
+        jupyter_hub_image: { get_input: jupyter_hub_image }
         jupyter_images: { get_input: jupyter_images }
         jupyter_use_gpu: { get_input: jupyter_use_gpu }
         jupyterlab_collaborative: { get_input: jupyterlab_collaborative }
@@ -211,26 +217,8 @@ topology_template:
     node_ip:
       value: { get_attribute: [vm_server, public_address, 0] }
     jupyter_endpoint:
-      value:
-        {
-          concat:
-            [
-              "https://",
-              get_attribute: [vm_server, public_address, 0],
-              ".myip.cloud.infn.it",
-              ":8888",
-            ],
-        }
+      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],  '.myip.cloud.infn.it:8888' ] }
     grafana_endpoint:
-      value:
-        {
-          concat:
-            [
-              "https://",
-              get_attribute: [vm_server, public_address, 0],
-              ".myip.cloud.infn.it",
-              ":3000",
-            ],
-        }
+      value: { concat: [ 'https://', get_attribute: [ vm_server, public_address, 0 ],  '.myip.cloud.infn.it:3000' ] }
     os_users:
       value: { get_property: [vm_server, os_users, 0] }
