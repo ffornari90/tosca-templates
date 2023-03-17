@@ -108,7 +108,6 @@ topology_template:
         iam_groups: { get_input: iam_groups }
         iam_admin_groups: { get_input: iam_admin_groups }
         monitoring: { get_input: enable_monitoring }
-        jupyter_hub_image: "dodasts/cygno-hub:v1.0.17-cygno"
         jupyter_images: { get_input: jupyter_images }
         jupyter_post_start_cmd: "/usr/local/share/dodasts/script/post_script.sh"
         jupyter_host_mount_dir: { get_input: mountpoint_data } 
