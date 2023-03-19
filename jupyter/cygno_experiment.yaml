@@ -3,6 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/-/raw/master/tosca_types/applications/jupyter_types.yaml
 
+
 description: >
   Run a single VM with CYGNO Environment prepared exposing both ssh access and JupyterHub interface.
 metadata:
@@ -59,7 +60,7 @@ topology_template:
 
     jupyter_images:
       type: string
-      default: "dodasts/cygno-lab:v1.0.12-cygno"
+      default: "dodasts/cygno-lab:v1.0.17-cygno"
       description: Default image for jupyter server
 
     ports:
@@ -68,6 +69,8 @@ topology_template:
       required: false
       default:
         {
+          "traefik-web": { "protocol": "tcp", "source": 80 },
+          "traefik-websecure": { "protocol": "tcp", "source": 443 },
           "jupyter": { "protocol": "tcp", "source": 8888 },
           "grafana": { "protocol": "tcp", "source": 3000 },
         }
@@ -105,11 +108,11 @@ topology_template:
         iam_groups: { get_input: iam_groups }
         iam_admin_groups: { get_input: iam_admin_groups }
         monitoring: { get_input: enable_monitoring }
-        jupyter_hub_image: "dodasts/cygno-hub:v1.0.13-cygno"
         jupyter_images: { get_input: jupyter_images }
         jupyter_post_start_cmd: "/usr/local/share/dodasts/script/post_script.sh"
         jupyter_host_mount_dir: { get_input: mountpoint_data } 
-        server_ip: { get_attribute: [HOST, public_address, 0] }
+        dns_name: { concat: [get_attribute: [HOST, public_address, 0], ".myip.cloud.infn.it"] }
+        letsencrypt_test: false
       requirements:
         - host: vm_server
 
@@ -187,27 +190,9 @@ topology_template:
   outputs:
     node_ip:
       value: { get_attribute: [vm_server, public_address, 0] }
-    node_creds:
-      value: { get_attribute: [vm_server, endpoint, credential, 0] }
     jupyter_endpoint:
-      value:
-        {
-          concat:
-            [
-              "https://",
-              get_attribute: [vm_server, public_address, 0],
-              ":8888",
-            ],
-        }
+      value: { concat: [ "https://", get_attribute: [vm_server, public_address, 0], ".myip.cloud.infn.it", ":8888" ], }
     grafana_endpoint:
-      value:
-        {
-          concat:
-            [
-              "https://",
-              get_attribute: [vm_server, public_address, 0],
-              ":3000",
-            ],
-        }
+      value: { concat: [ "https://", get_attribute: [vm_server, public_address, 0], ".myip.cloud.infn.it", ":3000" ] }
     os_users:
       value: { get_property: [vm_server, os_users, 0] }

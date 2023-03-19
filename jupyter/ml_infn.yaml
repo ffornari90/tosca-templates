@@ -92,7 +92,7 @@ topology_template:
 
     jupyter_images:
       type: string
-      default: "dodasts/ml-infn-lab:v1.0.0-snj"
+      default: "dodasts/ml-infn-lab:v1.0.6-ml-infn"
       description: Default image for jupyter server
 
     jupyter_use_gpu:
@@ -112,13 +112,20 @@ topology_template:
 
     jupyterlab_collaborative_image:
       type: string
-      default: "dodasts/ml-infn-jlabc:v1.0.5-ml-infn"
+      default: "dodasts/ml-infn-jlabc:v1.0.6-ml-infn"
       description: Default image for jupyter collaborative service
 
     cvmfs_repos:
       type: string
       default: "cms.cern.ch sft.cern.ch atlas.cern.ch"
       description: CMFS repositories to mount
+    
+    gpu_partition_flavor:
+      type: string
+      default: "None"
+      description: Enable GPU Partitioning and declare its flavor. Works only on Nvidia A100 GPUs
+      constraints:
+        - valid_values: ["None","2x 3g.40gb MIG GPUs","3x 2g.20gb MIG GPUs","7x 1g.10gb MIG GPUs"]
 
     ports:
       description: Ports to open on the VM
@@ -126,6 +133,8 @@ topology_template:
       required: false
       default:
         {
+          "traefik-web": { "protocol": "tcp", "source": 80 },
+          "traefik-websecure": { "protocol": "tcp", "source": 443 },
           "jupyter": { "protocol": "tcp", "source": 8888 },
           "jupyter-collaborative": { "protocol": "tcp", "source": 8889 },
           "grafana": { "protocol": "tcp", "source": 3000 },
@@ -152,8 +161,10 @@ topology_template:
         jupyterlab_collaborative_image:
           { get_input: jupyterlab_collaborative_image }
         cvmfs_repos: { get_input: cvmfs_repos }
-        server_ip: { get_attribute: [HOST, public_address, 0] }
         gpu_model: { get_input: gpu_model }
+        gpu_partition_flavor: { get_input: gpu_partition_flavor }
+        dns_name: { concat: [get_attribute: [HOST, public_address, 0], ".myip.cloud.infn.it"] }
+        letsencrypt_test: false
       requirements:
         - host: vm_server
 
@@ -216,6 +227,7 @@ topology_template:
             [
               "https://",
               get_attribute: [vm_server, public_address, 0],
+              ".myip.cloud.infn.it",
               ":8888",
             ],
         }
@@ -226,6 +238,7 @@ topology_template:
             [
               "https://",
               get_attribute: [vm_server, public_address, 0],
+              ".myip.cloud.infn.it",
               ":3000",
             ],
         }
