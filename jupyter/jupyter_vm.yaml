@@ -91,10 +91,6 @@ topology_template:
       default: ""
       description: Email address of certificate management administrator
 
-    letsencrypt_test:
-      type: boolean
-      default: true
-
     ports:
       description: Ports to open on the VM
       type: map
@@ -116,7 +112,7 @@ topology_template:
     ml_install:
       type: tosca.nodes.DODAS.single-node-jupyterhub
       properties:
-        letsencrypt_test: { get_input: letsencrypt_test }
+        letsencrypt_test: false
         contact_email: { get_input: contact_email }
         iam_url: { get_input: iam_url }
         iam_subject: { get_input: iam_subject }
