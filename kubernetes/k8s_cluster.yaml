@@ -25,12 +25,12 @@ topology_template:
     num_cpus_master:
       description: Number of CPU for K8s master VM
       type: integer
-      default: 2
+      default: 4
 
     mem_size_master:
       description: Memory size for K8s master VM
       type: string
-      default: "4 GB"
+      default: "8 GB"
 
     number_of_nodes:
       description: Number of K8s node VMs
@@ -40,12 +40,12 @@ topology_template:
     num_cpus_node:
       description: Number of CPUs of K8s node VMs
       type: integer
-      default: 2
+      default: 4
 
     mem_size_node:
       description: Memory size of K8s node VMs
       type: string
-      default: "4 GB"
+      default: "8 GB"
 
     domain:
       description: cloud domain
@@ -107,11 +107,21 @@ topology_template:
         - binding: k8s_node_server
         - link: priv_network
 
+    node_with_gpu_priv_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 0
+      requirements:
+        - binding: k8s_node_server_with_gpu
+        - link: priv_network
+
     k8s_master:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
       properties:
         kube_version: 1.24.9
         admin_token: { get_input: admin_token }
+        enable_gpu: { get_input: enable_gpu }
+        domain: myip.cloud.infn.it
       requirements:
         - host: k8s_master_server
 
@@ -122,6 +132,16 @@ topology_template:
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
         - host: k8s_node_server
+
+    k8s_node_with_gpu:
+      type: tosca.nodes.DODAS.WorkerNode.Kubernetes
+      properties:
+        kube_version: 1.24.9
+        front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
+        enable_gpu: { get_input: enable_gpu }
+        gpu_model: { get_input: gpu_model_node }
+      requirements:
+        - host: k8s_node_server_with_gpu
 
     k8s_master_server:
       type: tosca.nodes.indigo.Compute
@@ -162,17 +182,38 @@ topology_template:
             distribution: ubuntu
             version: 20.04
 
+    k8s_node_server_with_gpu:
+      type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
+      capabilities:
+        scalable:
+          properties:
+            count: { get_input: number_of_nodes_with_gpu }
+        host:
+          properties:
+            num_cpus: { get_input: num_cpus_node_with_gpu }
+            mem_size: { get_input: mem_size_node_with_gpu }
+            disk_size: { get_input: disk_size_node_with_gpu }
+            num_gpus: { get_input: num_gpus_node }
+            gpu_model: { get_input: gpu_model_node }
+        os:
+          properties:
+            distribution: ubuntu
+            version: 20.04
 
   outputs:
     k8s_endpoint:
-      value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, public_address, 0 ], '.', get_input: domain ] }
+      value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     grafana_endpoint:
-      value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, public_address, 0 ], '.', get_input: domain ] }
+      value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     grafana_username:
       value: admin
     k8s_master_ip:
       value: { get_attribute: [ k8s_master_server, public_address, 0 ] }
     k8s_node_ip:
       value: { get_attribute: [ k8s_node_server, private_address ] }
+    k8s_node_with_gpu_ip:
+      value: { get_attribute: [ k8s_node_server_with_gpu, private_address ] }
     os_users:
-      value: { get_property: [ k8s_master_server, os_users, 0 ] }
+      value: { get_property: [ k8s_master_server, os_users, 0 ] }  
