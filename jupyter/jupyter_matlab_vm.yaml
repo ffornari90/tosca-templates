@@ -96,6 +96,16 @@ topology_template:
       default: "ansible-role-jupyterhub"
       description: Name of the Ansible role to be used for jupyterhub environment setup
 
+    harbor_username:
+      type: string
+      default: ""
+      description: Username to log into INFN Cloud Harbor
+
+    harbor_password:
+      type: string
+      default: ""
+      description: Password to log into INFN Cloud Harbor
+
     network_domain:
       type: string
       default: "myip.cloud.infn.it"
@@ -143,6 +153,8 @@ topology_template:
         letsencrypt_test: { get_input: letsencrypt_test }
         contact_email: { get_input: contact_email }
         role_name: { get_input: role_name }
+        harbor_username: { get_input: harbor_username }
+        harbor_password: { get_input: harbor_password }
         iam_url: { get_input: iam_url }
         iam_subject: { get_input: iam_subject }
         iam_groups: { get_input: iam_groups }
