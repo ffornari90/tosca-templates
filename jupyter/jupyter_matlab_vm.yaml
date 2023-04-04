@@ -126,7 +126,7 @@ topology_template:
 
     matlab_license_server:
       type: string
-      default: "27000@lm-matlab.infn.it"
+      default: ""
       description: MATLAB license manager server to be contacted for MATLAB license download (syntax is "port@host")
 
     ports:
