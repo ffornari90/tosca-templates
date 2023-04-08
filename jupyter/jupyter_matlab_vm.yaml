@@ -24,6 +24,12 @@ topology_template:
       constraints:
         - valid_values: [4 GB, 8 GB, 16 GB]
 
+    disk_size:
+      type: scalar-unit.size
+      description: Size of the local disk available to applications running on the VM
+      default: 30 GB
+      required: yes
+
     os_distribution:
       type: string
       default: ubuntu
@@ -215,6 +221,7 @@ topology_template:
           properties:
             num_cpus: { get_input: num_cpus }
             mem_size: { get_input: mem_size }
+            disk_size: { get_input: disk_size }
         os:
           properties:
             distribution: { get_input: os_distribution }
