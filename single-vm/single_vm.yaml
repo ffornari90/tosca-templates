@@ -36,6 +36,12 @@ topology_template:
       constraints:
          - valid_values: [ 18.04, 20.04, 7 ]
 
+    hostname:
+      description: Hostname       
+      type: string
+      required: yes
+      default: vnode0
+
     service_ports:
       type: map
       required: false
@@ -91,6 +97,7 @@ topology_template:
       capabilities:
         endpoint:
           properties:
+            dns_name: { get_input: hostname }       
             ports: { get_input: service_ports }
         scalable:
           properties:
