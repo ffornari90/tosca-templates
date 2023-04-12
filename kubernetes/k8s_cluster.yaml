@@ -47,10 +47,47 @@ topology_template:
       type: string
       default: "8 GB"
 
-    domain:
-      description: cloud domain
+    disk_size_node:
+      description: Size of the local disk on K8s node VMs
+      type: scalar-unit.size
+
+    number_of_nodes_with_gpu:
+      description: Number of K8s nodes with GPU support
+      type: integer
+      default: 0
+
+    num_cpus_node_with_gpu:
+      description: Number of CPUs of K8s nodes with GPU support
+      type: integer
+      default: 4
+
+    mem_size_node_with_gpu:
+      description: Memory size of K8s nodes with GPU support
       type: string
-      default: "myip.cloud.infn.it"
+      default: "8 GB"
+
+    disk_size_node_with_gpu:
+      description: Size of the local disk on K8s node VMs
+      type: scalar-unit.size
+
+    num_gpus_node:
+      description: Number of GPUs for K8s nodes with GPU support
+      type: integer
+      default: 1
+      constraints:
+        - valid_values: [0, 1, 2]
+
+    gpu_model_node:
+      description: GPU model
+      type: string
+      default: ""
+      constraints:
+        - valid_values: ["", "T4", "A30"]
+
+    enable_gpu:
+      description: Flag to enable GPU support (configure software on GPU accelerated nodes)
+      type: boolean
+      default: false
 
     ports:
       description: Ports to open on the K8s master VM
@@ -177,6 +214,8 @@ topology_template:
           properties:
             num_cpus: { get_input: num_cpus_node }
             mem_size: { get_input: mem_size_node }
+            # disk_size: { get_input: disk_size_node }
+            num_gpus: 0
         os:
           properties:
             distribution: ubuntu
