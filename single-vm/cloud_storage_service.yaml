@@ -13,11 +13,6 @@ topology_template:
 
   inputs:
 
-    test_flag:
-      type: boolean
-      description: If set to true the certificate will be issued using the staging server of Letsencrypt
-      default: false
-
     num_cpus:
       type: integer
       description: Number of virtual cpus for the VM
@@ -155,7 +150,7 @@ topology_template:
     docker_compose_service:
       type: tosca.nodes.indigo.CloudStorageService
       properties:
-        test_flag: { get_input: test_flag }      
+        test_flag: false      
         data_service_implementation: { get_input: data_service_implementation }       
         data_service_hostname: { concat: [ "data.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
         mon_service_hostname: { concat: [ "status.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
