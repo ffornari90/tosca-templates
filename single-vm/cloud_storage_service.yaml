@@ -16,7 +16,7 @@ topology_template:
     test_flag:
       type: boolean
       description: If set to true the certificate will be issued using the staging server of Letsencrypt
-      default: true      
+      default: false
 
     num_cpus:
       type: integer
