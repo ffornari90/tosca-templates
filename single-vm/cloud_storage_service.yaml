@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v1.0.1/tosca_types/applications/storage_apps_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.0.0/tosca_types/applications/storage_apps_types.yaml
 
 description: >
   Deploy a cloud storage service
@@ -12,11 +12,6 @@ metadata:
 topology_template:
 
   inputs:
-
-    test_flag:
-      type: boolean
-      description: If set to true the certificate will be issued using the staging server of Letsencrypt
-      default: true      
 
     num_cpus:
       type: integer
@@ -155,7 +150,7 @@ topology_template:
     docker_compose_service:
       type: tosca.nodes.indigo.CloudStorageService
       properties:
-        test_flag: { get_input: test_flag }      
+        test_flag: false      
         data_service_implementation: { get_input: data_service_implementation }       
         data_service_hostname: { concat: [ "data.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
         mon_service_hostname: { concat: [ "status.",  get_attribute: [ HOST, public_address, 0 ], ".myip.cloud.infn.it" ] }
