@@ -4,11 +4,12 @@ imports:
   - indigo_custom_types: https://baltig.infn.it/fornari/tosca-types/-/raw/iam_voms-aa/tosca_types/applications/iam_types.yaml
 
 description: >
-  Deploy a virtual machine with docker engine and docker-compose pre-installed.
-  Run a docker compose file deploying Indigo-IAM.
+    The on-demand deployment service for the INDIGO IAM provides a quick and easy way for organizations to deploy their own instance of the INDIGO IAM, which is an open-source Identity and Access Management system.
+    The service allows users to configure and customize the instance as needed to meet their specific requirements.
+    Once deployed, the INDIGO IAM instance can be used to manage user identities, control access to resources, and enforce security policies across multiple applications and systems.
 
 metadata:
-  display_name: Docker-compose
+  display_name: INDIGO IAM as a Service
 
 topology_template:
 
