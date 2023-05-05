@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.0.2/tosca_types/applications/htcondor_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/devel/tosca_types/applications/htcondor_types.yaml
 
 description: Deploy a complete HTCondor 8.9.9 cluster
 
