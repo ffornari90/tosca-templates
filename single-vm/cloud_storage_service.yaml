@@ -109,7 +109,7 @@ topology_template:
 
     iam_authorized_group:
       type: string
-      required: yes
+      default: ''
       description: IAM group authorized to access the service
 
     iam_admin_group:
