@@ -7,6 +7,7 @@ description: >
     The on-demand deployment service for the INDIGO IAM provides a quick and easy way for organizations to deploy their own instance of the INDIGO IAM, which is an open-source Identity and Access Management system.
     The service allows users to configure and customize the instance as needed to meet their specific requirements.
     Once deployed, the INDIGO IAM instance can be used to manage user identities, control access to resources, and enforce security policies across multiple applications and systems.
+    A detailed description of all INDIGO IAM configuration parameters is available at https://indigo-iam.github.io/v/v1.8.1/docs/reference/configuration/.
 
 metadata:
   display_name: INDIGO IAM as a Service
@@ -166,7 +167,7 @@ topology_template:
 
     registration_saml_entity_id:
       type: string
-      default: urn:example
+      default: https://idp.infn.it/saml2/idp/metadata.php
       description: Entity ID of SAML provider to be contacted for authentication in order to apply for membership
 
     registration_username_attribute:
