@@ -59,12 +59,12 @@ topology_template:
     wn_image:
       description: HTCondor WN image name
       type: string
-      default: "htcondor/execute"
+      default: "harbor.cloud.infn.it/jupyter-matlab/htcondor_wn_matlab"
 
     wn_tag:
       description: HTCondor WN tag name
       type: string
-      default: "8.9.9-el7"
+      default: "latest"
 
     iam_server:
       description: IAM server name for HTCondor authN
