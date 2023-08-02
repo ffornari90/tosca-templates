@@ -71,6 +71,11 @@ topology_template:
       type: string
       default: "iam.cloud.infn.it"
 
+    client_cidr:
+      description: CIDR of MATLAB Parallel Server client instance
+      type: string
+      default: ""
+
     users:
       type: list
       description: list of users to create on the VM
