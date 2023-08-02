@@ -171,7 +171,7 @@ topology_template:
           schedd:
             enabled: true
             mapfile: |
-              SCITOKENS https:\\/\\/{{ iam_server }}\\/,(.*) condor
+              SCITOKENS https:\\/\\/{{ iam_server }}\\/,(.*) condor_pool
               PASSWORD (*.) condor
               GSI (.*) anonymous
             extraconfig: ''
