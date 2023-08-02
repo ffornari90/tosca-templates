@@ -323,6 +323,7 @@ topology_template:
       properties:
         kube_version: 1.24.12
         admin_token: { get_input: admin_token }
+        client_cidr: { get_input: client_cidr }
       requirements:
         - host: k8s_master_server
 
