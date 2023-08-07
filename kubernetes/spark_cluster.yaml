@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.0.3/tosca_types/applications/spark_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/devel/tosca_types/applications/spark_types.yaml
 
 description: Deploy a complete Spark 3.4.1 + Jupyter Notebook on top of a Kubernetes (K8s) 1.24 computing cluster
 
@@ -225,7 +225,7 @@ topology_template:
 
 
   outputs:
-    k8s_dashboard:
+    k8s_dashboard_url:
       value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     k8s_api:
       value:  { concat: [ 'https://api-kubernetes.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it/' ] }
