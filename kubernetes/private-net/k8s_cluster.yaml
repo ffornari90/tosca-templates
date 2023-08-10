@@ -34,7 +34,7 @@ topology_template:
     disk_size_master:
       description: Size of the local disk on K8s master VMs
       type: scalar-unit.size
-      default: "20 GB"
+      default: 20 GB
 
     number_of_nodes:
       description: number of K8s node VMs
@@ -54,7 +54,7 @@ topology_template:
     disk_size_node:
       description: Size of the local disk on K8s node VMs
       type: scalar-unit.size
-      default: "20 GB"
+      default: 20 GB
 
     ports:
       description:

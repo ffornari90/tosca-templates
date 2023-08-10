@@ -38,7 +38,7 @@ topology_template:
     disk_size_master:
       description: disk size for K8s master VM
       type: scalar-unit.size
-      default: "20 GB"
+      default: 20 GB
 
     number_of_slaves:
       description: number of K8s node VMs
@@ -58,7 +58,7 @@ topology_template:
     disk_size_slave:
       description: disk size for K8s node VM
       type: scalar-unit.size
-      default: "20 GB"
+      default: 20 GB
 
     iam_url:
       type: string
