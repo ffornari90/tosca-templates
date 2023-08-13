@@ -66,6 +66,11 @@ topology_template:
       type: string
       default: "latest"
 
+    wn_number:
+      description: Number of HTCondor WN pods
+      type: integer
+      default: 1
+
     iam_server:
       description: IAM server name for HTCondor authN
       type: string
@@ -223,7 +228,7 @@ topology_template:
                       - schedd
                       - master
                   topologyKey: kubernetes.io/hostname
-            replicas: 1
+            replicas: {{ wn_number }}
             image:
               name:  {{ wn_image }}
               tag:  '{{ wn_tag }}'
