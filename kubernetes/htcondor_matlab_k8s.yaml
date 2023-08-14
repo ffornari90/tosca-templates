@@ -161,6 +161,7 @@ topology_template:
         condor_host: { get_attribute: [ k8s_master_server , public_address, 0 ]  }
         wn_image: { get_input: wn_image }
         wn_tag: { get_input: wn_tag }
+        wn_number: { get_input: wn_number }
         iam_server: {get_input: iam_server }
         cluster_secret: {get_input: cluster_secret }
         helm_version: v3
