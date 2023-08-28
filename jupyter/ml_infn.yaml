@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.2.0/tosca_types/applications/jupyter_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.2.1/tosca_types/applications/jupyter_types.yaml
 
 description: Run a single VM with exposing both ssh access and multiuser JupyterHub interface, integrating the ML-INFN envirnoment
 
@@ -9,7 +9,9 @@ metadata:
   display_name: Computational enviroment for Machine Learning INFN (ML_INFN)
 
 topology_template:
+
   inputs:
+
     num_cpus:
       type: integer
       description: Number of virtual cpus for the VM
@@ -144,7 +146,15 @@ topology_template:
       entry_schema:
         type: tosca.datatypes.indigo.network.PortSpec
 
+    certificate_type:
+      required: no
+      type: string
+      default: letsencrypt-prod
+      constraints:
+        - valid_values: [ 'letsencrypt-prod', 'letsencrypt-staging', 'self-signed' ]
+
   node_templates:
+
     ml_install:
       type: tosca.nodes.DODAS.single-node-jupyterhub
       properties:
@@ -164,7 +174,7 @@ topology_template:
         gpu_model: { get_input: gpu_model }
         gpu_partition_flavor: { get_input: gpu_partition_flavor }
         dns_name: { concat: [get_attribute: [HOST, public_address, 0], ".myip.cloud.infn.it"] }
-        letsencrypt_test: false
+        cert_manager_type: { get_input: certificate_type }
       requirements:
         - host: vm_server
 
@@ -218,6 +228,7 @@ topology_template:
             version: { get_input: os_version }
 
   outputs:
+
     node_ip:
       value: { get_attribute: [vm_server, public_address, 0] }
     jupyter_endpoint:
