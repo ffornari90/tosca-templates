@@ -36,6 +36,11 @@ topology_template:
       type: string
       default: "8 GB"
 
+    disk_size_master:
+      description: disk size for K8s master VM
+      type: scalar-unit.size
+      default: 20 GB
+
     number_of_slaves:
       description: number of K8s node VMs
       type: integer
@@ -50,11 +55,11 @@ topology_template:
       description: memory size for K8s node VM
       type: string
       default: "8 GB"
-    
-    disk_size:
-      description: Size of the local disk available to applications running on the VM
+
+    disk_size_slave:
+      description: disk size for K8s node VM
       type: scalar-unit.size
-      default: 40 GB
+      default: 20 GB
 
     iam_url:
       type: string
@@ -199,7 +204,8 @@ topology_template:
         host:
           properties:
             num_cpus: { get_input: num_cpus_master }
-            mem_size: { get_input: mem_size_master } 
+            mem_size: { get_input: mem_size_master }
+            disk_size: { get_input: disk_size_master }
         os:
           properties:
             distribution: ubuntu
@@ -217,7 +223,7 @@ topology_template:
           properties:
             num_cpus: { get_input: num_cpus_slave }
             mem_size: { get_input: mem_size_slave }
-            disk_size: { get_input: disk_size }
+            disk_size: { get_input: disk_size_slave }
         os:
           properties:
             distribution: ubuntu
