@@ -3,31 +3,39 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.2.1/tosca_types/infrastructure/kubernetes_types.yaml
 
-description: Deploy a single master Kubernetes 1.19.6 cluster
+description: Deploy a single master Kubernetes 1.24.12 cluster
 
 topology_template:
 
+
   inputs:
 
+    certificate_type:
+      required: no
+      type: string
+      default: self-signed
+      constraints:
+        - valid_values: [ 'letsencrypt-prod', 'letsencrypt-staging', 'self-signed' ]
+
     admin_token:
-      description: password token for accessing k8s dashboard and grafana dashboard
+      description: Password token for accessing K8s dashboard and grafana dashboard
       type: string
       required: yes
 
     number_of_masters:
-      description: number of VMs for K8s master
+      description: Number of VMs for K8s master
       type: integer
       required: yes
       constraints:
         - valid_values: [ 1 ]
 
     num_cpus_master:
-      description: number of CPU for K8s master VM
+      description: Number of CPU for K8s master VM
       type: integer
       default: 4
 
     mem_size_master:
-      description: memory size for K8s master VM
+      description: Memory size for K8s master VM
       type: string
       default: "8 GB"
 
@@ -37,17 +45,17 @@ topology_template:
       default: 20 GB
 
     number_of_nodes:
-      description: number of K8s node VMs
+      description: Number of K8s node VMs
       type: integer
       default: 1
 
     num_cpus_node:
-      description: number of CPUs for K8s node VM
+      description: Number of CPUs of K8s node VMs
       type: integer
       default: 4
 
     mem_size_node:
-      description: memory size for K8s node VM
+      description: Memory size of K8s node VMs
       type: string
       default: "8 GB"
 
@@ -56,16 +64,53 @@ topology_template:
       type: scalar-unit.size
       default: 20 GB
 
+    number_of_nodes_with_gpu:
+      description: Number of K8s nodes with GPU support
+      type: integer
+      default: 0
+
+    num_cpus_node_with_gpu:
+      description: Number of CPUs of K8s nodes with GPU support
+      type: integer
+      default: 4
+
+    mem_size_node_with_gpu:
+      description: Memory size of K8s nodes with GPU support
+      type: string
+      default: "8 GB"
+
+    disk_size_node_with_gpu:
+      description: Size of the local disk on K8s node VMs
+      type: scalar-unit.size
+
+    num_gpus_node:
+      description: Number of GPUs for K8s nodes with GPU support
+      type: integer
+      default: 1
+      constraints:
+        - valid_values: [0, 1, 2]
+
+    gpu_model_node:
+      description: GPU model
+      type: string
+      default: ""
+      constraints:
+        - valid_values: ["", "T4", "A30"]
+
+    enable_gpu:
+      description: Flag to enable GPU support (configure software on GPU accelerated nodes)
+      type: boolean
+      default: false
+
     ports:
-      description:
+      description: Ports to open on the K8s master VM
       type: map
       required: false
-      default: { "http": { "protocol": "tcp", "source": 80 }, "https": { "protocol": "tcp", "source": 443 }}
+      default: { "http": { "protocol": "tcp", "source": 80 }, "https": { "protocol": "tcp", "source": 443 } }
       constraints:
         - min_length: 0
       entry_schema:
         type: tosca.datatypes.indigo.network.PortSpec
-      description: Ports to open on the K8s master VM
 
     users:
       type: list
@@ -74,6 +119,7 @@ topology_template:
         type: tosca.datatypes.indigo.User
       default: []
       required: false  
+
 
   node_templates:
 
@@ -98,22 +144,42 @@ topology_template:
         - binding: k8s_node_server
         - link: priv_network
 
+    node_with_gpu_priv_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 0
+      requirements:
+        - binding: k8s_node_server_with_gpu
+        - link: priv_network
 
     k8s_master:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
       properties:
-        kube_version: 1.19.6
+        kube_version: 1.24.12
         admin_token: { get_input: admin_token }
+        enable_gpu: { get_input: enable_gpu }
+        domain: myip.cloud.infn.it
+        cert_manager_type: { get_input: certificate_type }
       requirements:
         - host: k8s_master_server
 
     k8s_node:
       type: tosca.nodes.DODAS.WorkerNode.Kubernetes
       properties:
-        kube_version: 1.19.6
+        kube_version: 1.24.12
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
         - host: k8s_node_server
+
+    k8s_node_with_gpu:
+      type: tosca.nodes.DODAS.WorkerNode.Kubernetes
+      properties:
+        kube_version: 1.24.12
+        front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
+        enable_gpu: { get_input: enable_gpu }
+        gpu_model: { get_input: gpu_model_node }
+      requirements:
+        - host: k8s_node_server_with_gpu
 
     k8s_master_server:
       type: tosca.nodes.indigo.Compute
@@ -151,17 +217,37 @@ topology_template:
             num_cpus: { get_input: num_cpus_node }
             mem_size: { get_input: mem_size_node }
             disk_size: { get_input: disk_size_node }
+            num_gpus: 0
         os:
           properties:
             distribution: ubuntu
             version: 20.04
 
+    k8s_node_server_with_gpu:
+      type: tosca.nodes.indigo.Compute
+      properties:
+        os_users: { get_input: users }
+      capabilities:
+        scalable:
+          properties:
+            count: { get_input: number_of_nodes_with_gpu }
+        host:
+          properties:
+            num_cpus: { get_input: num_cpus_node_with_gpu }
+            mem_size: { get_input: mem_size_node_with_gpu }
+            disk_size: { get_input: disk_size_node_with_gpu }
+            num_gpus: { get_input: num_gpus_node }
+            gpu_model: { get_input: gpu_model_node }
+        os:
+          properties:
+            distribution: ubuntu
+            version: 20.04
 
   outputs:
     vpn_server:
       value: { get_property: [ priv_network, proxy_host ] }      
     k8s_endpoint:
-      value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, private_address, 0 ],  '.myip.cloud.infn.it' ] }
+      value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, private_address, 0 ], '.myip.cloud.infn.it' ] }
     grafana_endpoint:
       value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, private_address, 0 ], '.myip.cloud.infn.it' ] }
     grafana_username:
@@ -170,7 +256,9 @@ topology_template:
       value: { get_attribute: [ k8s_master_server, private_address, 0 ] }
     k8s_node_ip:
       value: { get_attribute: [ k8s_node_server, private_address ] }
+    k8s_node_with_gpu_ip:
+      value: { get_attribute: [ k8s_node_server_with_gpu, private_address ] }
     os_users:
       value: { get_property: [ k8s_master_server, os_users, 0 ] }  
     vpn_client_conf_url:
-      value: { concat: [ "https://baltig.infn.it/infn-cloud/vpnconfiles/-/raw/main/vpn-",  get_property: [ priv_network, proxy_host ], "-client.ovpn?inline=false" ] }      
+      value: { concat: [ "https://baltig.infn.it/infn-cloud/vpnconfiles/-/raw/main/vpn-",  get_property: [ priv_network, proxy_host ], "-client.ovpn?inline=false" ] }
