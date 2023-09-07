@@ -65,6 +65,16 @@ topology_template:
       type: string
       default: "8.9.9-el7"
 
+    schedd_image:
+      description: HTCondor Schedd image name
+      type: string
+      default: "dodasts/submit"
+
+    schedd_tag:
+      description: HTCondor Schedd tag name
+      type: string
+      default: "8.9.9-el7"
+
     iam_server:
       description: IAM server name for HTCondor authN
       type: string
@@ -139,6 +149,8 @@ topology_template:
         repos:
         - { name: dodas, url: "https://dodas-ts.github.io/helm_charts" }
         condor_host: { get_attribute: [ k8s_master_server , public_address, 0 ]  }
+        schedd_image: { get_input: schedd_image }
+        schedd_tag: { get_input: schedd_tag }
         wn_image: { get_input: wn_image }
         wn_tag: { get_input: wn_tag }
         iam_server: {get_input: iam_server }
@@ -156,7 +168,7 @@ topology_template:
           schedd:
             enabled: true
             mapfile: |
-              SCITOKENS https:\\/\\/{{ iam_server }}\\/,(.*) \\1@users.htcondor.org
+              SCITOKENS https:\\/\\/{{ iam_server }}\\/,(.*) condor_pool
               PASSWORD (*.) condor
               GSI (.*) anonymous
             extraconfig: ''
