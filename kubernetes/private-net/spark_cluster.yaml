@@ -1,9 +1,9 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.0.3/tosca_types/applications/spark_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.3.0/tosca_types/applications/spark_types.yaml
 
-description: Deploy a complete Spark 3.0.1 + Jupyter Notebook on top of a Kubernetes (K8s) computing cluster
+description: Deploy a complete Spark 3.4.1 + Jupyter Notebook on top of a Kubernetes (K8s) 1.28.1 computing cluster
 
 metadata:
   display_name: Spark + Jupyter cluster
@@ -25,7 +25,7 @@ topology_template:
       constraints:
         - valid_values: [ 1 ]
 
-    num_cpus_master: 
+    num_cpus_master:
       description: number of CPU for K8s master VM
       type: integer
       default: 4
@@ -35,12 +35,17 @@ topology_template:
       type: string
       default: "8 GB"
 
+    disk_size_master:
+      description: disk size for K8s master VM
+      type: scalar-unit.size
+      default: 20 GB
+
     number_of_slaves:
       description: number of K8s node VMs
       type: integer
-      default: 1 
+      default: 1
 
-    num_cpus_slave: 
+    num_cpus_slave:
       description: number of CPUs for K8s node VM
       type: integer
       default: 4
@@ -49,11 +54,36 @@ topology_template:
       description: memory size for K8s node VM
       type: string
       default: "8 GB"
-    
+
+    disk_size_slave:
+      description: disk size for K8s node VM
+      type: scalar-unit.size
+      default: 20 GB
+
+    iam_url:
+      type: string
+      default: "https://iam.cloud.infn.it"
+      description: IAM Instance for end user authentication
+
+    iam_subject:
+      type: string
+      default: ""
+      description: IAM owner subject
+
+    iam_groups:
+      type: string
+      default: ""
+      description: IAM groups for authorization management
+
+    iam_admin_groups:
+      type: string
+      default: ""
+      description: IAM groups for JupyterHub ADMIN authorization management
+
     s3_bucket:
       type: string
       description: S3 bucket
-    
+
     s3_endpoint:
       type: string
       description: "S3 endpoint (http://endpoint:9000)"
@@ -98,15 +128,25 @@ topology_template:
         repos:
         - { name: dodas, url: "https://dodas-ts.github.io/helm_charts" }
         externalIp: { get_attribute: [ k8s_master_server , private_address, 0 ]  }
+        iam_url: { get_input: iam_url }
+        iam_subject: { get_input: iam_subject }
+        iam_groups: { get_input: iam_groups }
+        iam_admin_groups: { get_input: iam_admin_groups }
         s3_bucket: { get_input: s3_bucket }
         s3_endpoint : { get_input: s3_endpoint }
         helm_version: v3
         values_file: |
           hub:
             host: {{ externalIp }}
+            image: dodasts/jhub:v0.0.15-jhub
           s3:
             bucket: {{ s3_bucket }}
             endpoint: {{ s3_endpoint }}
+          iam:
+            endpoint: {{ iam_endpoint }}
+            oauth_sub: {{ iam_subject }}
+            oauth_groups: {{ iam_groups }}
+            oauth_admin_groups: {{ iam_admin_groups }}
       requirements:
         - host: k8s_master_server
         - dependency: k8s_master
@@ -114,7 +154,7 @@ topology_template:
     k8s_master:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
       properties:
-        kube_version: 1.19.6
+        kube_version: 1.28.1
         admin_token: { get_input: admin_token }
       requirements:
         - host: k8s_master_server
@@ -122,7 +162,7 @@ topology_template:
     k8s_slave:
       type: tosca.nodes.DODAS.WorkerNode.Kubernetes
       properties:
-        kube_version: 1.19.6
+        kube_version: 1.28.1
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
         - host: k8s_slave_server
@@ -149,7 +189,8 @@ topology_template:
         host:
           properties:
             num_cpus: { get_input: num_cpus_master }
-            mem_size: { get_input: mem_size_master } 
+            mem_size: { get_input: mem_size_master }
+            disk_size: { get_input: disk_size_master }
         os:
           properties:
             distribution: ubuntu
@@ -166,7 +207,8 @@ topology_template:
         host:
           properties:
             num_cpus: { get_input: num_cpus_slave }
-            mem_size: { get_input: mem_size_slave } 
+            mem_size: { get_input: mem_size_slave }
+            disk_size: { get_input: disk_size_slave }
         os:
           properties:
             distribution: ubuntu
@@ -175,8 +217,8 @@ topology_template:
 
   outputs:
     vpn_server:
-      value: { get_property: [ priv_network, proxy_host ] }      
-    k8s_dashboard:
+      value: { get_property: [ priv_network, proxy_host ] }
+    k8s_dashboard_url:
       value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, private_address, 0 ], '.myip.cloud.infn.it' ] }
     k8s_api:
       value:  { concat: [ 'https://api-kubernetes.', get_attribute: [ k8s_master_server, private_address, 0 ], '.myip.cloud.infn.it/' ] }
@@ -184,11 +226,15 @@ topology_template:
       value: { concat: [ 'https://jhub.', get_attribute: [ k8s_master_server, private_address, 0 ], '.myip.cloud.infn.it/hub' ] }
     k8s_master_ip:
       value: { get_attribute: [ k8s_master_server, private_address, 0 ] }
+    k8s_master_node_creds:
+      value: { get_attribute: [ k8s_master_server, endpoint, credential, 0 ] }
     k8s_wn_ip:
       value: { get_attribute: [ k8s_slave_server, private_address ] }
+    k8s_wn_node_creds:
+      value: { get_attribute: [ k8s_slave_server, endpoint, credential ] }
     grafana_endpoint:
       value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, private_address, 0 ], '.myip.cloud.infn.it' ] }
     os_users:
-      value: { get_property: [ k8s_master_server, os_users, 0 ] }  
+      value: { get_property: [ k8s_master_server, os_users, 0 ] }
     vpn_client_conf_url:
-      value: { concat: [ "https://baltig.infn.it/infn-cloud/vpnconfiles/-/raw/main/vpn-",  get_property: [ priv_network, proxy_host ], "-client.ovpn?inline=false" ] }      
+      value: { concat: [ "https://baltig.infn.it/infn-cloud/vpnconfiles/-/raw/main/vpn-",  get_property: [ priv_network, proxy_host ], "-client.ovpn?inline=false" ] }

@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+if [ $CURRENT_BRANCH == 'master' ]; then
+  echo "[Post-checkout Hook] info: Nothing to do on the master branch!"
+  exit 0
+fi
+
+if [ $CURRENT_BRANCH == 'HEAD' ]; then
+  echo "Skipping post-checkout script"
+  exit 0
+fi
+
+while : ; do
+    read -p "Specify the tosca types tag/branch to use (leave empty to use current configuration): " TT_BRANCH < /dev/tty
+
+    if [ ! -z "${TT_BRANCH}" ]; then
+      git ls-remote --exit-code https://baltig.infn.it/infn-cloud/tosca-types.git refs/heads/${TT_BRANCH} refs/tags/${TT_BRANCH} &> /dev/null
+      if [ $? -eq 2 ]; then
+        echo "Error: the specified ref does not exist. Please provide a valid branch/tag name!"
+      else
+        break
+      fi
+    else
+      exit 0
+    fi
+done
+
+
+declare -a FILES
+
+echo "Updating the tosca-types imported in the templates..."
+
+FILES=(`git ls-files; git ls-files . --exclude-standard --others`)
+
+for file in "${FILES[@]}"; do
+  if [[ $file == *.yml || $file == *.yaml ]]; then
+    echo "Updating file $file"
+    python3 ./.githooks/bin/update-types-links.py "${TT_BRANCH}" $file
+  fi
+done
+
+# commit changes, if any
+git commit -m"Set tosca-types branch ${TT_BRANCH}" -a
+exit 0
+

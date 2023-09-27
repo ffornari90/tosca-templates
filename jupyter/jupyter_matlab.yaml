@@ -9,7 +9,6 @@ metadata:
   display_name: Jupyter with persistence for Notebooks
 
 topology_template:
-
   inputs:
     num_cpus:
       type: integer
@@ -109,18 +108,11 @@ topology_template:
       entry_schema:
         type: tosca.datatypes.indigo.network.PortSpec
 
-    certificate_type:
-      required: no
-      type: string
-      default: self-signed
-      constraints:
-        - valid_values: [ 'letsencrypt-prod', 'letsencrypt-staging', 'self-signed' ]
-
   node_templates:
-
     ml_install:
       type: tosca.nodes.DODAS.single-node-jupyterhub
       properties:
+        letsencrypt_test: false
         contact_email: { get_input: contact_email }
         iam_url: { get_input: iam_url }
         iam_subject: { get_input: iam_subject }
@@ -133,13 +125,25 @@ topology_template:
         jupyter_post_start_cmd: "/usr/local/share/dodasts/script/post_script.sh"
         jupyterlab_collaborative_image:
           { get_input: jupyterlab_collaborative_image }
-        dns_name: { concat: [get_attribute: [HOST, private_address, 0], ".myip.cloud.infn.it"] }
-        cert_manager_type: { get_input: certificate_type }
+        dns_name: { concat: [get_attribute: [HOST, public_address, 0], ".myip.cloud.infn.it"] }
       requirements:
         - host: vm_server
 
+    pub_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: public
+
+    server_pub_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 1
+      requirements:
+        - binding: vm_server
+        - link: pub_network
+
     priv_network:
-      type: tosca.nodes.indigo.network.Network
+      type: tosca.nodes.network.Network
       properties:
         network_type: private
 
@@ -172,18 +176,17 @@ topology_template:
             version: { get_input: os_version }
 
   outputs:
-
     node_ip:
-      value: { get_attribute: [vm_server, private_address, 0] }
-    vpn_server:
-      value: { get_property: [ priv_network, proxy_host ] }  
+      value: { get_attribute: [vm_server, public_address, 0] }
+    node_creds:
+      value: { get_attribute: [vm_server, endpoint, credential, 0] }
     jupyter_endpoint:
       value:
         {
           concat:
             [
               "https://",
-              get_attribute: [vm_server, private_address, 0],
+              get_attribute: [vm_server, public_address, 0],
               ".myip.cloud.infn.it",
               ":8888",
             ],
@@ -194,12 +197,10 @@ topology_template:
           concat:
             [
               "https://",
-              get_attribute: [vm_server, private_address, 0],
+              get_attribute: [vm_server, public_address, 0],
               ".myip.cloud.infn.it",
               ":3000",
             ],
         }
     os_users:
       value: { get_property: [vm_server, os_users, 0] }
-    vpn_client_conf_url:
-      value: { concat: [ "https://baltig.infn.it/infn-cloud/vpnconfiles/-/raw/main/vpn-",  get_property: [ priv_network, proxy_host ], "-client.ovpn?inline=false" ] }      

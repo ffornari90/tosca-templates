@@ -1,9 +1,9 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.0.3/tosca_types/applications/htcondor_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.3.0/tosca_types/applications/htcondor_types.yaml
 
-description: Deploy a complete HTCondor 8.9.9 cluster
+description: Deploy a complete HTCondor cluster
 
 metadata:
   display_name: HTCondor cluster
@@ -30,7 +30,7 @@ topology_template:
       constraints:
         - valid_values: [ 1 ]
 
-    num_cpus_master: 
+    num_cpus_master:
       description: number of CPU for K8s master VM
       type: integer
       default: 4
@@ -43,9 +43,9 @@ topology_template:
     number_of_slaves:
       description: number of K8s node VMs
       type: integer
-      default: 1 
+      default: 3
 
-    num_cpus_slave: 
+    num_cpus_slave:
       description: number of CPUs for K8s node VM
       type: integer
       default: 4
@@ -63,7 +63,9 @@ topology_template:
     wn_tag:
       description: HTCondor WN tag name
       type: string
-      default: "8.9.9-el7"
+      default: ""
+      constraints:
+        - valid_values: ["", "8.9.9-el7", "9.0-el7"]
 
     iam_server:
       description: IAM server name for HTCondor authN
@@ -76,7 +78,7 @@ topology_template:
       entry_schema:
         type: tosca.datatypes.indigo.User
       default: []
-      required: false  
+      required: false
 
 
   node_templates:
@@ -109,7 +111,7 @@ topology_template:
           - { name: longhorn, url: "https://charts.longhorn.io" }
         name: longhorn
         chart: "longhorn/longhorn"
-        inline_options: "--version 1.4.0 -n longhorn-system --create-namespace"
+        inline_options: "--version 1.5.1 -n longhorn-system --create-namespace"
         helm_version: v3
         values_file: |
           persistence:
@@ -125,7 +127,7 @@ topology_template:
         chart: "dodas/htcondor"
         repos:
         - { name: dodas, url: "https://dodas-ts.github.io/helm_charts" }
-        condor_host: { get_attribute: [ k8s_master_server , private_address, 0 ]  }
+        condor_host: { get_attribute: [ k8s_master_server , private_address, 0 ] }
         wn_image: { get_input: wn_image }
         wn_tag: { get_input: wn_tag }
         iam_server: {get_input: iam_server }
@@ -140,7 +142,7 @@ topology_template:
           cluster:
             secret: {{ cluster_secret }}
 
-          schedd: 
+          schedd:
             enabled: true
             mapfile: |
               SCITOKENS https:\\/\\/{{ iam_server }}\\/,(.*) \\1@users.htcondor.org
@@ -153,17 +155,17 @@ topology_template:
               nodePort: 31618
               targetPort: 31618
             image:
-              name: {{ schedd_image }} 
-              tag:  '{{ schedd_tag }}'
+              name: {{ schedd_image }}
+              tag:  '{{ wn_tag }}'
               pullPolicy: IfNotPresent
             persistence:
               spooldir:
                 enabled: true
                 storageClass: longhorn
-                size: 20Gi 
+                size: 10Gi
             requests:
               memory: '500M'
-              cpu: '100m' 
+              cpu: '100m'
 
           master:
             enabled: true
@@ -175,12 +177,12 @@ topology_template:
               nodePort: 30618
               targetPort: 30618
             image:
-              name: {{ cm_image }} 
-              tag:  '{{ cm_tag }}'
+              name: {{ cm_image }}
+              tag:  '{{ wn_tag }}'
               pullPolicy: IfNotPresent
             requests:
               memory: '500M'
-              cpu: '100m' 
+              cpu: '100m'
 
           wn:
             enabled: true
@@ -197,17 +199,17 @@ topology_template:
                   topologyKey: kubernetes.io/hostname
             replicas: 1
             image:
-              name:  {{ wn_image }} 
+              name:  {{ wn_image }}
               tag:  '{{ wn_tag }}'
               pullPolicy: IfNotPresent
             # Condor slot type
             slotType: cpus=1, mem=2000
             requests:
               memory: '1500M'
-              cpu: 1 
+              cpu: 1
             # Define you own persistent volume to mount
             persistentVolume:
-              pv: 
+              pv:
                 name: ''
                 spec: ''
               pvc:
@@ -224,7 +226,7 @@ topology_template:
 
           prometheusExporter:
             enabled: false
-            image:  
+            image:
               name: ttedesch/htcondor-exporter
               pullPolicy: IfNotPresent
               tag: 'v2'
@@ -254,7 +256,7 @@ topology_template:
             pullPolicy: IfNotPresent
 
             # List of repos to be mounted
-            repoList: cms.cern.ch  grid.cern.ch  oasis.cern.ch  singularity.opensciencegrid.org 
+            repoList: cms.cern.ch  grid.cern.ch  oasis.cern.ch  singularity.opensciencegrid.org
 
             privKey: []
             #  - name: spiga
@@ -275,9 +277,9 @@ topology_template:
             enabled: false
             image: dodasts/tts-cache
             tag: v0.1.3-k8s-12
-            iamToken: 
+            iamToken:
             iamClientId:
-            iamClientSecret: 
+            iamClientSecret:
 
             pullPolicy: IfNotPresent
             replicas: 1
@@ -286,7 +288,6 @@ topology_template:
             iamScimClientId:
             iamScimSecret:
             iamMapGroup: ALL
-
       requirements:
         - host: k8s_master_server
         - dependency: longhorn
@@ -294,7 +295,7 @@ topology_template:
     k8s_master:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
       properties:
-        kube_version: 1.19.6
+        kube_version: 1.28.1
         admin_token: { get_input: admin_token }
       requirements:
         - host: k8s_master_server
@@ -302,7 +303,7 @@ topology_template:
     k8s_slave:
       type: tosca.nodes.DODAS.WorkerNode.Kubernetes
       properties:
-        kube_version: 1.19.6
+        kube_version: 1.28.1
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
         - host: k8s_slave_server
@@ -335,7 +336,7 @@ topology_template:
         host:
           properties:
             num_cpus: { get_input: num_cpus_master }
-            mem_size: { get_input: mem_size_master } 
+            mem_size: { get_input: mem_size_master }
         os:
           properties:
             distribution: ubuntu
@@ -352,7 +353,7 @@ topology_template:
         host:
           properties:
             num_cpus: { get_input: num_cpus_slave }
-            mem_size: { get_input: mem_size_slave } 
+            mem_size: { get_input: mem_size_slave }
         os:
           properties:
             distribution: ubuntu

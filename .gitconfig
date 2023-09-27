@@ -1,0 +1,6 @@
+[core]
+	hooksPath = .githooks
+[alias]
+  tosca-mr = "!f() { \
+        ./.githooks/bin/prepare-mr.sh \"$1\" ; \
+       }; f"
