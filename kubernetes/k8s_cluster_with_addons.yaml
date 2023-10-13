@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/k8s-kafka/tosca_types/infrastructure/kubernetes_types.yaml
 
-description: Deploy a single master Kubernetes 1.24.12 cluster with a Kafka instance
+description: Deploy a single master Kubernetes 1.28.1 cluster with a Kafka instance
 metadata:
   display_name: Kubernetes with Kafka cluster
 
@@ -17,7 +17,7 @@ topology_template:
       type: string
       default: letsencrypt-prod
       constraints:
-        - valid_values: [ 'letsencrypt-prod', 'letsencrypt-staging', 'self-signed' ]      
+        - valid_values: [ 'letsencrypt-prod', 'letsencrypt-staging', 'self-signed' ]
 
     admin_token:
       description: Password token for accessing K8s dashboard and grafana dashboard
@@ -228,7 +228,7 @@ topology_template:
     k8s_master:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
       properties:
-        kube_version: 1.24.12
+        kube_version: 1.28.1
         admin_token: { get_input: admin_token }
         enable_gpu: { get_input: enable_gpu }
         domain: myip.cloud.infn.it
@@ -239,7 +239,7 @@ topology_template:
     k8s_node:
       type: tosca.nodes.DODAS.WorkerNode.Kubernetes
       properties:
-        kube_version: 1.24.12
+        kube_version: 1.28.1
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
         - host: k8s_node_server
@@ -247,7 +247,7 @@ topology_template:
     k8s_node_with_gpu:
       type: tosca.nodes.DODAS.WorkerNode.Kubernetes
       properties:
-        kube_version: 1.24.12
+        kube_version: 1.28.1
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
         enable_gpu: { get_input: enable_gpu }
         gpu_model: { get_input: gpu_model_node }
