@@ -9,9 +9,17 @@ metadata:
   display_name: HTCondor cluster
   template_type: "kubernetes"
 
+
 topology_template:
 
   inputs:
+
+    certificate_type:
+      required: no
+      type: string
+      default: letsencrypt-prod
+      constraints:
+        - valid_values: [ 'letsencrypt-prod', 'letsencrypt-staging', 'self-signed' ]
 
     admin_token:
       description: token for accessing K8s dashboard and Grafana admin password
@@ -39,6 +47,13 @@ topology_template:
       description: memory size for K8s master VM
       type: string
       default: "8 GB"
+
+    storage_size:
+      type: scalar-unit.size
+      description: Size of the volume to be mounted in /data
+      default: 20 GB
+      constraints:
+        in_range: [1 GB, 100 GB]
 
     number_of_slaves:
       description: number of K8s node VMs
@@ -117,6 +132,11 @@ topology_template:
         - binding: k8s_slave_server
         - link: priv_network
 
+    block_device:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: storage_size }
+
     longhorn:
       type: tosca.nodes.DODAS.HelmInstall
       properties:
@@ -146,7 +166,7 @@ topology_template:
         iam_server: {get_input: iam_server }
         cluster_secret: {get_input: cluster_secret }
         helm_version: v3
-        inline_options: "--version 2.1.16"
+        inline_options: "--version 2.1.17"
         values_file: |
           # Default values for htcondor.
           # This is a YAML-formatted file.
@@ -310,6 +330,7 @@ topology_template:
       properties:
         kube_version: 1.28.1
         admin_token: { get_input: admin_token }
+        cert_manager_type: { get_input: certificate_type }
       requirements:
         - host: k8s_master_server
 
@@ -354,6 +375,14 @@ topology_template:
           properties:
             distribution: ubuntu
             version: 20.04
+      requirements:
+        - local_storage:
+            node: block_device
+            capability: tosca.capabilities.Attachment
+            relationship:
+              type: tosca.relationships.AttachesTo
+              properties:
+                location: '/data'
 
     k8s_slave_server:
       type: tosca.nodes.indigo.Compute
