@@ -150,9 +150,9 @@ topology_template:
         condor_host: { get_attribute: [ k8s_master_server , private_address, 0 ] }
         wn_image: { get_input: wn_image }
         wn_tag: { get_input: wn_tag }
-        iam_server: {get_input: iam_server }
-        cluster_secret: {get_input: cluster_secret }
-        storage_size: {get_input: storage_size }
+        iam_server: { get_input: iam_server }
+        cluster_secret: { get_input: cluster_secret }
+        storage_size: { get_input: storage_size }
         helm_version: v3
         inline_options: "--version 2.1.17"
         values_file: |
