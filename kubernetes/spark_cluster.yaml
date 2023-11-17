@@ -1,9 +1,9 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.8.0/tosca_types/applications/spark_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.9.0/tosca_types/applications/spark_types.yaml
 
-description: Deploy a complete Spark 3.4.1 + Jupyter Notebook on top of a Kubernetes (K8s) 1.28.1 computing cluster
+description: Deploy a complete Spark 3.4.1 + Jupyter Notebook on top of a Kubernetes (K8s) 1.28.3 computing cluster
 
 metadata:
   display_name: Spark + Jupyter cluster
@@ -13,6 +13,13 @@ topology_template:
 
 
   inputs:
+
+    certificate_type:
+      required: no
+      type: string
+      default: letsencrypt-prod
+      constraints:
+        - valid_values: [ 'letsencrypt-prod', 'letsencrypt-staging', 'self-signed' ]
 
     admin_token:
       description: token for accessing K8s dashboard and Grafana admin password
@@ -26,7 +33,7 @@ topology_template:
       constraints:
         - valid_values: [ 1 ]
 
-    num_cpus_master: 
+    num_cpus_master:
       description: number of CPU for K8s master VM
       type: integer
       default: 4
@@ -44,9 +51,9 @@ topology_template:
     number_of_slaves:
       description: number of K8s node VMs
       type: integer
-      default: 1 
+      default: 1
 
-    num_cpus_slave: 
+    num_cpus_slave:
       description: number of CPUs for K8s node VM
       type: integer
       default: 4
@@ -150,6 +157,7 @@ topology_template:
         s3_bucket: { get_input: s3_bucket }
         s3_endpoint : { get_input: s3_endpoint }
         helm_version: v3
+        inline_options: "--version 1.2.5"
         values_file: |
           hub:
             host: {{ externalIp }}
@@ -169,15 +177,16 @@ topology_template:
     k8s_master:
       type: tosca.nodes.DODAS.FrontEnd.Kubernetes
       properties:
-        kube_version: 1.28.1
+        kube_version: 1.28.3
         admin_token: { get_input: admin_token }
+        cert_manager_type: { get_input: certificate_type }
       requirements:
         - host: k8s_master_server
 
     k8s_slave:
       type: tosca.nodes.DODAS.WorkerNode.Kubernetes
       properties:
-        kube_version: 1.28.1
+        kube_version: 1.28.3
         front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
       requirements:
         - host: k8s_slave_server
