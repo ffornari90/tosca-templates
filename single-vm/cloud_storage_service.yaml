@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v3.0.0/tosca_types/applications/storage_apps_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v3.3.0/tosca_types/applications/storage_apps_types.yaml
 
 description: >
   Deploy a cloud storage service
@@ -104,8 +104,13 @@ topology_template:
 
     iam_url:
       type: string
-      default: https://iam.cloud.infn.it
+      default: https://iam.cloud.infn.it/
       description: IAM url
+
+    iam_subject:
+      type: string
+      required: yes
+      description: IAM owner subject
 
     iam_authorized_group:
       type: string
@@ -126,6 +131,13 @@ topology_template:
       required: false
 
   node_templates:
+
+    iam_client:
+      type: tosca.nodes.indigo.iam.client
+      properties:
+        scopes: openid profile email
+        issuer: { get_input: iam_url }
+        owner: { get_input: iam_subject }
 
     s3_data_bucket:
       type: tosca.nodes.indigo.S3Bucket
@@ -171,6 +183,8 @@ topology_template:
         iam_url: { get_input: iam_url }
         iam_group: { get_input: iam_authorized_group }
         iam_admin_group: { get_input: iam_admin_group }
+        iam_client_id: { get_property: [ iam_client, client_id ] }
+        iam_client_token: { get_property: [ iam_client, registration_access_token ] }
       requirements:
         - host: server
         - dependency: s3_data_bucket
