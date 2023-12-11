@@ -167,7 +167,7 @@ topology_template:
         cluster_secret: { get_input: cluster_secret }
         storage_size: { get_input: storage_size }
         helm_version: v3
-        inline_options: "--version 2.2.0"
+        inline_options: "--version 2.1.18"
         values_file: |
           # Default values for htcondor.
           # This is a YAML-formatted file.
