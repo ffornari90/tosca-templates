@@ -132,7 +132,6 @@ topology_template:
       properties:
         scopes: openid profile email
         issuer: { get_input: iam_url }
-        owner: { get_input: iam_subject }
 
     s3_data_bucket:
       type: tosca.nodes.indigo.S3Bucket
