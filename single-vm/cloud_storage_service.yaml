@@ -107,11 +107,6 @@ topology_template:
       default: https://iam.cloud.infn.it/
       description: IAM url
 
-    iam_subject:
-      type: string
-      required: yes
-      description: IAM owner subject
-
     iam_authorized_group:
       type: string
       default: ''
