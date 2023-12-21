@@ -1,13 +1,13 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.3.0/tosca_types/applications/iam_types.yaml
+  - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v3.4.0/tosca_types/applications/iam_types.yaml
 
 description: >
     The on-demand deployment service for the INDIGO IAM provides a quick and easy way for organizations to deploy their own instance of the INDIGO IAM, which is an open-source Identity and Access Management system.
     The service allows users to configure and customize the instance as needed to meet their specific requirements.
     Once deployed, the INDIGO IAM instance can be used to manage user identities, control access to resources, and enforce security policies across multiple applications and systems.
-    A detailed description of all INDIGO IAM configuration parameters is available at https://indigo-iam.github.io/v/v1.8.1/docs/reference/configuration/
+    A detailed description of all INDIGO IAM configuration parameters is available at https://indigo-iam.github.io/v/v1.8.2/docs/reference/configuration/
 
 metadata:
   display_name: INDIGO IAM as a Service
@@ -42,7 +42,7 @@ topology_template:
 
     iam_version:
       type: string
-      default: v1.8.2p1
+      default: v1.8.2p2
       description: Version of the IAM service being deployed
 
     jwk_cache_lifetime:
@@ -480,7 +480,7 @@ topology_template:
         privacy_policy_url:  { get_input: privacy_policy_url }
         privacy_policy_text:  { get_input: privacy_policy_text }
         jwt_default_profile:  { get_input: jwt_default_profile }
-        docker_compose_file_url: https://baltig.infn.it/infn-cloud/tosca-types/raw/v2.3.0/artifacts/docker/iam/docker-compose.yml
+        docker_compose_file_url: https://baltig.infn.it/infn-cloud/tosca-types/raw/v3.4.0/artifacts/docker/iam/compose.yml
         environment_variables: { get_input: environment_variables }
         server_ip: { get_attribute: [HOST, public_address, 0] }
         dns_name: { concat: [get_attribute: [HOST, public_address, 0], ".", get_property: [ SELF, network_domain ]] }

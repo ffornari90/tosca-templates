@@ -3,7 +3,9 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://baltig.infn.it/infn-cloud/tosca-types/raw/v3.4.0/tosca_types/infrastructure/kubernetes_types.yaml
 
-description: Deploy a single master Kubernetes 1.28.3 cluster
+description: Deploy a single master Kubernetes 1.28.3 cluster with a Kafka instance
+metadata:
+  display_name: Kubernetes with Kafka cluster
 
 topology_template:
 
@@ -13,7 +15,7 @@ topology_template:
     certificate_type:
       required: no
       type: string
-      default: self-signed
+      default: letsencrypt-prod
       constraints:
         - valid_values: [ 'letsencrypt-prod', 'letsencrypt-staging', 'self-signed' ]
 
@@ -106,7 +108,7 @@ topology_template:
       description: Ports to open on the K8s master VM
       type: map
       required: false
-      default: { "http": { "protocol": "tcp", "source": 80 }, "https": { "protocol": "tcp", "source": 443 } }
+      default: { "http": { "protocol": "tcp", "source": 80 }, "https": { "protocol": "tcp", "source": 443 }, "api": { "protocol": "tcp", "source": 6443} }
       constraints:
         - min_length: 0
       entry_schema:
@@ -120,11 +122,82 @@ topology_template:
       default: []
       required: false  
 
+    kafka_enabled:
+      type: boolean
+      default: false
+    kafka_replicas:
+      type: integer
+      default: 1
+    kafka_enable_public_connections:
+      type: boolean
+      default: false
+    kafka_public_port:
+      type: integer
+      default: 30092
+    kafka_admin_user:
+      type: string
+      default: admin
+    kafka_admin_password:
+      type: string
+      default: pass
+    kafka_volume_longhorn_admin_user:
+      type: string
+      default: admin
+    kafka_volume_longhorn_admin_password:
+      type: string
+      default: pass
+    kafka_kraft_enabled:
+      type: boolean
+      default: false
+    kafka_kraft_replicas:
+      type: integer
+      default: 1
+    kafka_kraft_enable_public_connections:
+      type: boolean
+      default: false
+    kafka_kraft_public_port:
+      type: integer
+      default: 31093
+    zookeeper_enabled:
+      type: boolean
+      default: false      
+    zookeeper_replicas:
+      type: integer
+      default: 1
+    zookeeper_enable_public_connections:
+      type: boolean
+      default: false
+    zookeeper_public_port:
+      type: integer
+      default: 32181
+    kafka_ui_enabled:
+      type: boolean
+      default: true
+    kafka_ui_admin_user:
+      type: string
+      default: admin
+    kafka_ui_admin_password:
+      type: string
+      default: pass
+
 
   node_templates:
 
+    pub_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: public
+
+    server_pub_port:
+      type: tosca.nodes.network.Port
+      properties:
+        order: 1
+      requirements:
+        - binding: k8s_master_server
+        - link: pub_network
+
     priv_network:
-      type: tosca.nodes.indigo.network.Network
+      type: tosca.nodes.network.Network
       properties:
         network_type: private
 
@@ -243,22 +316,66 @@ topology_template:
             distribution: ubuntu
             version: 20.04
 
+    k8s_longhorn:
+      type: tosca.nodes.DODAS.Kubernetes.LongHorn
+      properties:
+        is_enabled: { get_input: kafka_enabled }
+        repos:
+          - { name: longhorn, url: "https://charts.longhorn.io" }
+        name: longhorn
+        chart: "longhorn/longhorn"
+        inline_options: "--version 1.5.1 -n longhorn-system --create-namespace"
+        helm_version: v3
+        values_file: |
+          persistence:
+            defaultClassReplicaCount: 1
+      requirements:
+        - host: k8s_master_server
+        - dependency: k8s_master
+
+    k8s_kafka:
+      type: tosca.nodes.DODAS.Kubernetes.Kafka
+      properties:
+        is_enabled: { get_input: kafka_enabled }
+        kafka_enabled: { get_input: kafka_enabled }
+        kafka_replicas: { get_input: kafka_replicas }
+        kafka_enable_public_connections: { get_input: kafka_enable_public_connections }
+        kafka_public_port: { get_input: kafka_public_port }
+        kafka_admin_user: { get_input: kafka_admin_user }
+        kafka_admin_password: { get_input: kafka_admin_password }
+        kafka_volume_longhorn_admin_user: { get_input: kafka_volume_longhorn_admin_user }
+        kafka_volume_longhorn_admin_password: { get_input: kafka_volume_longhorn_admin_password }
+        kafka_kraft_enabled: { get_input: kafka_kraft_enabled }
+        kafka_kraft_replicas: { get_input: kafka_kraft_replicas }
+        kafka_kraft_enable_public_connections: { get_input: kafka_kraft_enable_public_connections }
+        kafka_kraft_public_port: { get_input: kafka_kraft_public_port }        
+        zookeeper_enabled: { get_input: zookeeper_enabled }
+        zookeeper_replicas: { get_input: zookeeper_replicas }
+        zookeeper_enable_public_connections: { get_input: zookeeper_enable_public_connections }
+        zookeeper_public_port: { get_input: zookeeper_public_port }
+        kafka_ui_enabled: { get_input: kafka_ui_enabled }
+        kafka_ui_admin_user: { get_input: kafka_ui_admin_user }
+        kafka_ui_admin_password: { get_input: kafka_ui_admin_password }
+        kube_type_of_node: front
+        kube_front_end_ip: { get_attribute: [ k8s_master_server, private_address, 0 ] }
+        domain: myip.cloud.infn.it
+        cert_manager_type: { get_input: certificate_type }
+      requirements:
+        - host: k8s_master_server
+        - dependency: k8s_longhorn
+
   outputs:
-    vpn_server:
-      value: { get_property: [ priv_network, proxy_host ] }      
     k8s_endpoint:
-      value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, private_address, 0 ], '.myip.cloud.infn.it' ] }
+      value: { concat: [ 'https://dashboard.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     grafana_endpoint:
-      value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, private_address, 0 ], '.myip.cloud.infn.it' ] }
+      value: { concat: [ 'https://grafana.', get_attribute: [ k8s_master_server, public_address, 0 ], '.myip.cloud.infn.it' ] }
     grafana_username:
       value: admin
     k8s_master_ip:
-      value: { get_attribute: [ k8s_master_server, private_address, 0 ] }
+      value: { get_attribute: [ k8s_master_server, public_address, 0 ] }
     k8s_node_ip:
       value: { get_attribute: [ k8s_node_server, private_address ] }
     k8s_node_with_gpu_ip:
       value: { get_attribute: [ k8s_node_server_with_gpu, private_address ] }
     os_users:
       value: { get_property: [ k8s_master_server, os_users, 0 ] }  
-    vpn_client_conf_url:
-      value: { concat: [ "https://baltig.infn.it/infn-cloud/vpnconfiles/-/raw/main/vpn-",  get_property: [ priv_network, proxy_host ], "-client.ovpn?inline=false" ] }
